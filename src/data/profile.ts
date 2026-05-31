@@ -15,7 +15,7 @@ export type Profile = {
 
 export const profiles: Record<Locale, Profile> = {
   en: {
-    name: 'Jisung Kang',
+    name: 'Jeesung Kahng',
     role: 'Entry-Level Software Developer',
     location: 'Gyeonggi-do, South Korea',
     headline: 'I build practical software that gives users more control.',
