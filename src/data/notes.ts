@@ -1,7 +1,7 @@
 import type { Locale } from '../lib/locale';
 import note20260304Content from './noteContents/2026-03-04.md?raw';
-import note20260304Content from './noteContents/2026-03-05.md?raw';
-import note20260304Content from './noteContents/2026-03-06.md?raw';
+import note20260305Content from './noteContents/2026-03-05.md?raw';
+import note20260306Content from './noteContents/2026-03-06.md?raw';
 
 export type Note = {
   id: string;
