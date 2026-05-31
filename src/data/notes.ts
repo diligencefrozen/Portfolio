@@ -1,7 +1,29 @@
 import type { Locale } from '../lib/locale';
+// 2026년 03월
 import note20260304Content from './noteContents/2026-03-04.md?raw';
 import note20260305Content from './noteContents/2026-03-05.md?raw';
 import note20260306Content from './noteContents/2026-03-06.md?raw';
+
+import note20260309Content from './noteContents/2026-03-09.md?raw';
+import note20260310Content from './noteContents/2026-03-10.md?raw';
+import note20260311Content from './noteContents/2026-03-11.md?raw';
+import note20260312Content from './noteContents/2026-03-12.md?raw';
+import note20260313Content from './noteContents/2026-03-13.md?raw';
+
+import note20260317Content from './noteContents/2026-03-17.md?raw';
+import note20260318Content from './noteContents/2026-03-18.md?raw';
+import note20260319Content from './noteContents/2026-03-19.md?raw';
+import note20260320Content from './noteContents/2026-03-20.md?raw';
+
+import note20260323Content from './noteContents/2026-03-23.md?raw';
+import note20260324Content from './noteContents/2026-03-24.md?raw';
+import note20260325Content from './noteContents/2026-03-25.md?raw';
+import note20260326Content from './noteContents/2026-03-26.md?raw';
+import note20260327Content from './noteContents/2026-03-27.md?raw';
+
+import note20260330Content from './noteContents/2026-03-30.md?raw';
+import note20260331Content from './noteContents/2026-03-31.md?raw';
+
 
 export type Note = {
   id: string;
@@ -226,7 +248,7 @@ const note20260305 = createStudyNote({
   month: 'March 2026',
   category: 'Java / Basic',
   location: '',
-  summary: 'Java fundamentals note covering JDK, JVM, Eclipse setup, comments, output methods, escape sequences, and printf formatting.',
+  summary: '',
   tags: ['Java', 'JDK', 'JVM', 'Eclipse', 'Console', 'printf'],
   important: true,
   content: note20260305Content,
@@ -238,7 +260,7 @@ const note20260306 = createStudyNote({
   month: 'March 2026',
   category: 'Java / Basic',
   location: '',
-  summary: 'Java fundamentals note covering JDK, JVM, Eclipse setup, comments, output methods, escape sequences, and printf formatting.',
+  summary: '',
   tags: ['Java', 'JDK', 'JVM', 'Eclipse', 'Console', 'printf'],
   important: true,
   content: note20260306Content,
