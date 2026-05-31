@@ -5,9 +5,9 @@ export function Career() {
   return (
     <section id="career" className="section-shell">
       <SectionHeading
-        kicker="Career"
-        title="경력"
-        description="지금까지의 경험을 단순 나열하지 않고, 어떤 문제를 해결했고 어떤 방식으로 기여했는지 중심으로 보여줍니다."
+        kicker="Experience"
+        title="Project-Based Experience"
+        description="Although I am an entry-level developer, I focus on building real products that solve practical user-facing problems."
       />
 
       <div className="mt-12 space-y-6">

@@ -7,8 +7,8 @@ export function Projects() {
     <section id="projects" className="section-shell">
       <SectionHeading
         kicker="Projects"
-        title="프로젝트"
-        description="프로젝트는 기술 스택보다 문제, 해결 방식, 결과가 먼저 보이게 구성하는 것이 좋습니다."
+        title="Selected Projects"
+        description="Each project is presented around the problem, solution, technical approach, and practical outcome."
       />
 
       <div className="mt-12 grid gap-6 lg:grid-cols-2">

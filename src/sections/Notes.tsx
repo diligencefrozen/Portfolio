@@ -5,9 +5,9 @@ export function Notes() {
   return (
     <section id="notes" className="section-shell">
       <SectionHeading
-        kicker="Study Notes"
-        title="공부한 필기노트"
-        description="학습 기록은 개발 실력의 성장 과정을 보여주는 좋은 증거입니다. 짧은 요약과 태그 중심으로 정리했습니다."
+        kicker="Engineering Notes"
+        title="Technical Notes"
+        description="Short notes that summarize technical decisions, implementation details, and problem-solving patterns from my projects."
       />
 
       <div className="mt-12 grid gap-5 md:grid-cols-3">
