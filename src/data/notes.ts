@@ -266,7 +266,7 @@ const note20260306 = createStudyNote({
 
 // 2026-03-09 / 03092026
 const note20260309 = createStudyNote({
-  date: '2026-03-06',
+  date: '2026-03-09',
   month: 'March 2026',
   category: 'Java / Basic',
   location: '',
@@ -277,7 +277,7 @@ const note20260309 = createStudyNote({
 
 // 2026-03-10 / 03102026
 const note20260310 = createStudyNote({
-  date: '2026-03-06',
+  date: '2026-03-10',
   month: 'March 2026',
   category: 'Java / Basic',
   location: '',
@@ -300,7 +300,7 @@ const note20260311 = createStudyNote({
 
 // 2026-03-12 / 03122026
 const note20260312 = createStudyNote({
-  date: '2026-03-06',
+  date: '2026-03-12',
   month: 'March 2026',
   category: 'Java / Basic',
   location: '',
