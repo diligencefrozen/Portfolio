@@ -28,7 +28,7 @@ export const careerItemsByLocale: Record<Locale, CareerItem[]> = {
   ko: [
     {
       company: 'Personal Project',
-      role: 'DCinside Gallery Blocker 개발 및 유지보수',
+      role: '디시갤 차단기 개발 및 유지보수',
       period: '2025-2026',
       location: 'Chrome Extension',
       summary:
