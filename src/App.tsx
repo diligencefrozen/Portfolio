@@ -8,7 +8,7 @@ import { Resume } from './sections/Resume';
 
 export default function App() {
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(56,189,248,0.22),_transparent_32rem),linear-gradient(180deg,_#020617_0%,_#0f172a_45%,_#020617_100%)]">
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(37,99,235,0.10),_transparent_32rem),linear-gradient(180deg,_#ffffff_0%,_#f8fafc_45%,_#eef6ff_100%)] text-slate-900">
       <Header />
       <main>
         <Home />
