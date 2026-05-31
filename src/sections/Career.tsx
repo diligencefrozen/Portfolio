@@ -15,18 +15,18 @@ export function Career() {
           <article key={`${item.company}-${item.period}`} className="card">
             <div className="flex flex-col justify-between gap-4 md:flex-row md:items-start">
               <div>
-                <h3 className="text-2xl font-bold text-white">{item.role}</h3>
-                <p className="mt-1 text-sky-200">{item.company}</p>
+                <h3 className="text-2xl font-extrabold text-slate-950">{item.role}</h3>
+                <p className="mt-1 font-bold text-blue-700">{item.company}</p>
               </div>
-              <div className="text-left text-sm text-slate-400 md:text-right">
+              <div className="text-left text-sm font-semibold text-slate-500 md:text-right">
                 <p>{item.period}</p>
                 <p>{item.location}</p>
               </div>
             </div>
-            <p className="mt-5 text-slate-300">{item.summary}</p>
-            <ul className="mt-5 grid gap-3 text-slate-300 md:grid-cols-3">
+            <p className="mt-5 leading-8 text-slate-700">{item.summary}</p>
+            <ul className="mt-5 grid gap-3 text-slate-700 md:grid-cols-3">
               {item.achievements.map((achievement) => (
-                <li key={achievement} className="rounded-2xl bg-white/[0.04] p-4">
+                <li key={achievement} className="rounded-2xl border border-slate-200 bg-slate-50 p-4 leading-7">
                   {achievement}
                 </li>
               ))}

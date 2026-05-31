@@ -204,10 +204,10 @@ export function Notes() {
         <button
           type="button"
           onClick={() => setActiveMonth(ALL_MONTHS)}
-          className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
+          className={`rounded-full px-4 py-2 text-sm font-bold transition ${
             activeMonth === ALL_MONTHS
-              ? 'bg-sky-400 text-slate-950'
-              : 'border border-white/10 text-slate-300 hover:border-sky-300/40 hover:text-white'
+              ? 'bg-slate-950 text-white shadow-sm'
+              : 'border border-slate-300 bg-white text-slate-700 hover:border-blue-300 hover:text-blue-700'
           }`}
         >
           All
@@ -218,10 +218,10 @@ export function Notes() {
             key={month}
             type="button"
             onClick={() => setActiveMonth(month)}
-            className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
+            className={`rounded-full px-4 py-2 text-sm font-bold transition ${
               activeMonth === month
-                ? 'bg-sky-400 text-slate-950'
-                : 'border border-white/10 text-slate-300 hover:border-sky-300/40 hover:text-white'
+                ? 'bg-slate-950 text-white shadow-sm'
+                : 'border border-slate-300 bg-white text-slate-700 hover:border-blue-300 hover:text-blue-700'
             }`}
           >
             {month}
@@ -230,51 +230,51 @@ export function Notes() {
       </div>
 
       <div className="mt-6 grid gap-4 lg:grid-cols-[1fr_0.45fr]">
-        <label className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-slate-300">
-          <Search size={18} className="text-slate-500" />
+        <label className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-700 shadow-sm">
+          <Search size={18} className="text-slate-400" />
           <input
             type="search"
             value={searchQuery}
             onChange={(event) => setSearchQuery(event.target.value)}
             placeholder="Search by date, title, category, tag..."
-            className="w-full bg-transparent text-sm text-white outline-none placeholder:text-slate-500"
+            className="w-full bg-transparent text-sm font-medium text-slate-950 outline-none placeholder:text-slate-400"
           />
         </label>
 
-        <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-slate-300">
+        <div className="flex items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 shadow-sm">
           <span className="inline-flex items-center gap-2">
-            <CheckCircle2 size={18} className="text-sky-300" />
+            <CheckCircle2 size={18} className="text-blue-600" />
             Checked
           </span>
-          <strong className="text-white">
+          <strong className="text-slate-950">
             {validCheckedCount} / {notes.length}
           </strong>
         </div>
       </div>
 
       <div className="mt-8 grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">
-        <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-4">
+        <div className="rounded-[2rem] border border-slate-200 bg-white/80 p-4 shadow-[0_20px_70px_rgba(15,23,42,0.06)]">
           <div className="flex items-center justify-between gap-3 px-2 pb-4">
             <div>
-              <p className="text-sm font-semibold text-white">Board</p>
-              <p className="text-xs text-slate-500">Select a date card to read the note.</p>
+              <p className="text-sm font-extrabold text-slate-950">Board</p>
+              <p className="text-xs font-medium text-slate-500">Select a date card to read the note.</p>
             </div>
-            <p className="rounded-full bg-white/[0.06] px-3 py-1 text-xs text-slate-400">
+            <p className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-600">
               {filteredNotes.length} notes
             </p>
           </div>
 
           <div className="grid max-h-[42rem] gap-4 overflow-y-auto pr-1 lg:grid-cols-3">
             {groupedNotes.map((group) => (
-              <div key={group.month} className="rounded-2xl bg-slate-950/50 p-3">
+              <div key={group.month} className="rounded-2xl border border-slate-200 bg-slate-50 p-3">
                 <div className="mb-3 flex items-center justify-between gap-2 px-1">
                   <div className="flex items-center gap-2">
-                    <span className="rounded-md bg-white/10 px-2 py-1 text-xs font-semibold text-slate-300">
+                    <span className="rounded-md bg-white px-2 py-1 text-xs font-extrabold text-slate-700 shadow-sm">
                       {group.month.split(' ')[0]}
                     </span>
-                    <span className="text-xs text-slate-500">{group.notes.length}</span>
+                    <span className="text-xs font-bold text-slate-500">{group.notes.length}</span>
                   </div>
-                  <CalendarDays size={15} className="text-slate-600" />
+                  <CalendarDays size={15} className="text-slate-400" />
                 </div>
 
                 <div className="space-y-2">
@@ -289,8 +289,8 @@ export function Notes() {
                         onClick={() => setSelectedNoteId(note.id)}
                         className={`w-full rounded-2xl border p-3 text-left transition ${
                           isSelected
-                            ? 'border-sky-300/70 bg-sky-300/10'
-                            : 'border-white/10 bg-white/[0.04] hover:border-sky-300/40 hover:bg-white/[0.07]'
+                            ? 'border-blue-300 bg-blue-50 shadow-sm'
+                            : 'border-slate-200 bg-white hover:border-blue-200 hover:bg-blue-50/60'
                         }`}
                       >
                         <div className="flex items-start gap-3">
@@ -300,21 +300,21 @@ export function Notes() {
                             aria-label={`Mark ${note.title} as checked`}
                             onClick={(event) => event.stopPropagation()}
                             onChange={() => toggleCheckedNote(note.id)}
-                            className="mt-1 size-4 rounded border-slate-600 accent-sky-400"
+                            className="mt-1 size-4 rounded border-slate-300 accent-blue-600"
                           />
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center gap-2">
-                              <FileText size={15} className="shrink-0 text-slate-500" />
+                              <FileText size={15} className="shrink-0 text-slate-400" />
                               <p
-                                className={`truncate text-sm font-semibold ${
-                                  isChecked ? 'text-slate-500 line-through' : 'text-white'
+                                className={`truncate text-sm font-bold ${
+                                  isChecked ? 'text-slate-400 line-through' : 'text-slate-900'
                                 }`}
                               >
                                 {note.title}
                               </p>
-                              {note.important && <Star size={13} className="shrink-0 fill-sky-300 text-sky-300" />}
+                              {note.important && <Star size={13} className="shrink-0 fill-blue-500 text-blue-500" />}
                             </div>
-                            <p className="mt-1 text-xs text-slate-500">{note.date}</p>
+                            <p className="mt-1 text-xs font-medium text-slate-500">{note.date}</p>
                           </div>
                         </div>
                       </button>
@@ -328,20 +328,20 @@ export function Notes() {
 
         {selectedNote && (
           <article className="card xl:sticky xl:top-28 xl:max-h-[48rem] xl:overflow-y-auto">
-            <div className="flex flex-col justify-between gap-4 border-b border-white/10 pb-6 md:flex-row md:items-start">
+            <div className="flex flex-col justify-between gap-4 border-b border-slate-200 pb-6 md:flex-row md:items-start">
               <div>
                 <p className="section-kicker">Selected Note</p>
-                <h3 className="mt-3 text-3xl font-black text-white">{selectedNote.title}</h3>
-                <p className="mt-2 text-sm text-slate-400">{selectedNote.date}</p>
+                <h3 className="mt-3 text-3xl font-black text-slate-950">{selectedNote.title}</h3>
+                <p className="mt-2 text-sm font-semibold text-slate-500">{selectedNote.date}</p>
               </div>
 
               <button
                 type="button"
                 onClick={() => toggleCheckedNote(selectedNote.id)}
-                className={`inline-flex items-center justify-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition ${
+                className={`inline-flex items-center justify-center gap-2 rounded-full px-4 py-2 text-sm font-bold transition ${
                   selectedNoteIsChecked
-                    ? 'bg-sky-400 text-slate-950'
-                    : 'border border-white/10 text-slate-300 hover:border-sky-300/40 hover:text-white'
+                    ? 'bg-slate-950 text-white shadow-sm'
+                    : 'border border-slate-300 bg-white text-slate-700 hover:border-blue-300 hover:text-blue-700'
                 }`}
               >
                 <CheckCircle2 size={17} />
@@ -359,11 +359,11 @@ export function Notes() {
               ))}
             </div>
 
-            <p className="mt-5 rounded-2xl bg-white/[0.04] p-4 text-sm leading-7 text-slate-300">
+            <p className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm leading-7 text-slate-700">
               {selectedNote.summary}
             </p>
 
-            <div className="mt-8 rounded-3xl border border-white/10 bg-slate-950/40 p-5">
+            <div className="mt-8 rounded-[2rem] border border-slate-200 bg-white p-5 shadow-sm">
               <MarkdownRenderer content={selectedNote.content} />
             </div>
           </article>

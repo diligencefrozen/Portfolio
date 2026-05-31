@@ -8,16 +8,16 @@ export function Projects() {
       <SectionHeading
         kicker="Project"
         title="Featured Project"
-        description="The portfolio now focuses on one representative project: DCinside Gallery Blocker. The goal is to make the main product clear instead of spreading attention across unrelated items."
+        description="The portfolio focuses on one representative project: DCinside Gallery Blocker. The goal is to make the main product clear instead of spreading attention across unrelated items."
       />
 
       <div className="mt-12 grid gap-6">
         {projects.map((project) => (
           <article key={project.title} className="card flex flex-col justify-between">
             <div>
-              <h3 className="text-3xl font-bold text-white">{project.title}</h3>
-              <p className="mt-4 max-w-4xl leading-8 text-slate-300">{project.description}</p>
-              <p className="mt-5 rounded-2xl bg-sky-300/10 p-5 text-sm leading-7 text-sky-100">
+              <h3 className="text-3xl font-extrabold text-slate-950">{project.title}</h3>
+              <p className="mt-4 max-w-4xl leading-8 text-slate-700">{project.description}</p>
+              <p className="mt-5 rounded-2xl border border-blue-100 bg-blue-50 p-5 text-sm font-medium leading-7 text-blue-950">
                 {project.impact}
               </p>
               <div className="mt-6 flex flex-wrap gap-2">
@@ -29,10 +29,10 @@ export function Projects() {
               </div>
             </div>
 
-            <div className="mt-8 flex flex-wrap gap-4 text-sm font-semibold">
+            <div className="mt-8 flex flex-wrap gap-4 text-sm font-bold">
               {project.githubUrl && (
                 <a
-                  className="inline-flex items-center gap-1 rounded-full border border-white/10 px-4 py-2 text-slate-200 transition hover:border-white/30 hover:text-white"
+                  className="inline-flex items-center gap-1 rounded-full border border-slate-300 bg-white px-4 py-2 text-slate-800 shadow-sm transition hover:border-blue-300 hover:text-blue-700"
                   href={project.githubUrl}
                   target="_blank"
                   rel="noreferrer"
@@ -42,7 +42,7 @@ export function Projects() {
               )}
               {project.liveUrl && (
                 <a
-                  className="inline-flex items-center gap-1 rounded-full bg-sky-400 px-4 py-2 text-slate-950 transition hover:bg-sky-300"
+                  className="inline-flex items-center gap-1 rounded-full bg-slate-950 px-4 py-2 text-white shadow-sm transition hover:bg-blue-700"
                   href={project.liveUrl}
                   target="_blank"
                   rel="noreferrer"

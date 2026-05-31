@@ -12,7 +12,7 @@ export function Resume() {
         <div>
           <ul className="space-y-3">
             {resume.highlights.map((highlight) => (
-              <li key={highlight} className="rounded-2xl bg-white/[0.04] p-4 text-slate-300">
+              <li key={highlight} className="rounded-2xl border border-slate-200 bg-slate-50 p-4 leading-7 text-slate-700">
                 {highlight}
               </li>
             ))}
@@ -21,7 +21,7 @@ export function Resume() {
           <div className="mt-8 flex flex-wrap gap-4">
             <a
               href={profile.resumeUrl}
-              className="inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 font-semibold text-slate-950 transition hover:-translate-y-0.5"
+              className="inline-flex items-center gap-2 rounded-full bg-slate-950 px-6 py-3 font-bold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-blue-700"
               download
             >
               Download PDF <Download size={18} />
@@ -30,13 +30,13 @@ export function Resume() {
               href={profile.github}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex items-center gap-2 rounded-full border border-white/10 px-6 py-3 font-semibold text-white transition hover:border-sky-300/60"
+              className="inline-flex items-center gap-2 rounded-full border border-slate-300 bg-white px-6 py-3 font-bold text-slate-800 shadow-sm transition hover:border-blue-300 hover:text-blue-700"
             >
               View GitHub
             </a>
           </div>
 
-          <p className="mt-5 text-sm text-slate-500">
+          <p className="mt-5 text-sm font-medium text-slate-500">
             Personal details such as phone number and full address are excluded from this public portfolio.
           </p>
         </div>
