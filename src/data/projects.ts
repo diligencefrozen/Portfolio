@@ -9,17 +9,31 @@ export type Project = {
 
 export const projects: Project[] = [
   {
-    title: 'Portfolio Website',
-    description: 'TypeScript, React, Vite, Tailwind CSS로 만든 개인 포트폴리오 사이트입니다.',
-    impact: 'GitHub Pages에 자동 배포되는 정적 사이트 구조를 구현했습니다.',
-    stack: ['TypeScript', 'React', 'Vite', 'Tailwind CSS', 'GitHub Actions'],
-    githubUrl: 'https://github.com/your-id/portfolio',
-    liveUrl: 'https://your-id.github.io/portfolio',
+    title: 'DCinside Gallery Blocker',
+    description:
+      'A Chrome extension that helps DCinside users reduce unwanted exposure to galleries, posts, comments, users, images, and DCCon content. The project focuses on giving users more control over what they see while browsing.',
+    impact:
+      'Published and maintained as a Chrome extension. It includes gallery blocking, Real-Time Best hiding, post filtering, comment filtering, user blocking, image filtering, DCCon filtering, and automatic cleanup features.',
+    stack: [
+      'JavaScript',
+      'Chrome Extension',
+      'DOM',
+      'MutationObserver',
+      'Content Script',
+      'Browser Storage',
+      'HTML5',
+      'CSS3',
+    ],
+    githubUrl: 'https://github.com/diligencefrozen/DCinside-Gallery-Blocker',
+    liveUrl: 'https://chromewebstore.google.com/detail/fnfmdbldnhadkadklplhcjcojjiaopgg',
   },
   {
-    title: 'Business Landing Page',
-    description: '미국 고객을 타깃으로 한 제품/서비스 소개 랜딩 페이지입니다.',
-    impact: '명확한 CTA와 섹션 흐름으로 문의 전환을 목표로 설계했습니다.',
-    stack: ['React', 'Copywriting', 'Responsive UI'],
+    title: 'Developer Portfolio Website',
+    description:
+      'A personal portfolio website designed to present my projects, technical background, and developer profile in a clear and structured way.',
+    impact:
+      'Built with a data-driven structure so profile information, projects, skills, and technical notes can be updated easily. The project is designed with GitHub Pages deployment in mind.',
+    stack: ['TypeScript', 'React', 'Vite', 'Tailwind CSS', 'GitHub Actions'],
+    githubUrl: 'https://github.com/diligencefrozen',
   },
 ];

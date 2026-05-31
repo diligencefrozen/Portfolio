@@ -9,24 +9,35 @@ export type Note = {
 
 export const notes: Note[] = [
   {
-    title: 'React 컴포넌트 설계 원칙',
-    category: 'Frontend',
-    date: '2026-05-25',
-    summary: '재사용 가능한 컴포넌트 구조, props 설계, 상태 분리 기준을 정리한 노트입니다.',
-    tags: ['React', 'Architecture', 'Components'],
+    title: 'Handling Content Blocking in Dynamic DOM Environments',
+    category: 'Browser Extension',
+    date: '2026-05-31',
+    summary:
+      'Explored how to reliably hide galleries, posts, comments, users, images, and DCCon elements based on user settings in pages where the DOM changes dynamically.',
+    tags: ['JavaScript', 'DOM', 'MutationObserver'],
   },
   {
-    title: 'Tailwind CSS 디자인 시스템 메모',
-    category: 'UI',
-    date: '2026-05-25',
-    summary: '색상, 간격, 타이포그래피를 일관되게 운영하기 위한 Tailwind 사용 패턴을 정리했습니다.',
-    tags: ['Tailwind CSS', 'Design System'],
+    title: 'Chrome Extension Structure and Permission Design',
+    category: 'Extension',
+    date: '2026-05-31',
+    summary:
+      'Organized the extension into manifest, content scripts, popup/options pages, and local storage while keeping the permission scope focused and minimal.',
+    tags: ['Chrome Extension', 'Manifest', 'Storage'],
   },
   {
-    title: 'GitHub Pages 배포 체크리스트',
-    category: 'Deployment',
-    date: '2026-05-25',
-    summary: 'Vite 프로젝트를 GitHub Pages에 올릴 때 확인해야 할 base path와 Actions 설정을 정리했습니다.',
-    tags: ['Vite', 'GitHub Pages', 'CI/CD'],
+    title: 'Java/Spring Web Application Flow',
+    category: 'Backend',
+    date: '2026-05-31',
+    summary:
+      'Studied the flow of a Spring-based web application through Controller, Service, Mapper, and Database layers, including MyBatis integration points.',
+    tags: ['Java', 'Spring MVC', 'MyBatis'],
+  },
+  {
+    title: 'SQL and Database Integration Notes',
+    category: 'Database',
+    date: '2026-05-31',
+    summary:
+      'Reviewed table design, CRUD operations, SQL query writing, and web application integration using MySQL and Oracle.',
+    tags: ['MySQL', 'Oracle', 'SQL'],
   },
 ];

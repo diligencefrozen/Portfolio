@@ -1,11 +1,13 @@
 export const resume = {
   title: 'Resume',
   intro:
-    '이력서는 PDF 다운로드와 웹 요약 두 가지 방식으로 제공하는 것을 추천합니다. 채용 담당자는 빠르게 스캔하고, 관심이 생기면 PDF를 저장할 수 있습니다.',
+    'A concise overview of my developer profile, project experience, technical skills, and areas of interest.',
   highlights: [
-    'Frontend: TypeScript, React, Vite, Tailwind CSS',
-    'Business: 미국 고객 타깃 웹사이트/랜딩 페이지 기획 경험',
-    'Strength: 실행력, 빠른 학습, 제품 관점의 UI 개선',
+    'Target Role: Entry-Level Software Developer',
+    'Main Project: DCinside Gallery Blocker - Chrome extension development and maintenance',
+    'Core Experience: Dynamic DOM handling, content filtering, Chrome Extension architecture, browser storage, and user-facing problem solving',
+    'Interests: Product usability, browser automation, content-control tools, and practical software development',
+    'Skills: JavaScript, HTML5, CSS3, Python, Java, Spring Framework, Spring MVC, MyBatis, Oracle, MySQL',
   ],
   fileName: 'resume.pdf',
 };
