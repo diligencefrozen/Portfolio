@@ -1,4 +1,4 @@
-import { readFile, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
 const PROJECT_ID = 'dcinside-gallery-blocker';
@@ -11,7 +11,28 @@ const STORE_REVIEWS_URLS = [
 ];
 const GITHUB_OWNER = 'diligencefrozen';
 const GITHUB_REPO = 'DCinside-Gallery-Blocker';
-const OUTPUT_FILE = path.join(process.cwd(), 'src/data/projectLiveSnapshots.json');
+const OUTPUT_FILE = path.join(process.cwd(), 'public/project-live-metrics.json');
+
+const DEFAULT_CHROME_WEB_STORE = {
+  status: 'fallback',
+  sourceUrl: `${STORE_URL}/reviews?hl=ko`,
+  category: '확장 프로그램',
+  subcategory: '도구',
+  userCount: 448,
+  rating: 4.7,
+  ratingCount: 9,
+  reviews: [],
+};
+
+const DEFAULT_GITHUB = {
+  status: 'fallback',
+  repo: `${GITHUB_OWNER}/${GITHUB_REPO}`,
+  sourceUrl: `https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}`,
+  commitCount: 449,
+  latestCommitAt: '2026-05-31T00:00:00.000Z',
+  latestCommitMessage: 'Active maintenance',
+  latestCommitUrl: `https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}/commits/main`,
+};
 
 function cleanText(value = '') {
   return value
@@ -28,131 +49,157 @@ function cleanText(value = '') {
     .trim();
 }
 
-function firstMatch(text, patterns) {
+function numberFromText(value) {
+  if (!value) return null;
+  const numeric = Number(String(value).replace(/,/g, '').trim());
+  return Number.isFinite(numeric) ? numeric : null;
+}
+
+function firstNumber(text, patterns) {
   for (const pattern of patterns) {
     const match = text.match(pattern);
-    if (match?.[1]) {
-      return match[1].trim();
-    }
+    const value = numberFromText(match?.[1]);
+    if (value !== null) return value;
   }
-  return '';
+
+  return null;
 }
 
-function formatNumber(value) {
-  if (!value) return '';
-  return value.replace(/,/g, '').replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+function removeUndefinedEntries(value) {
+  return Object.fromEntries(Object.entries(value).filter(([, entryValue]) => entryValue !== undefined));
 }
 
-async function readPreviousSnapshot() {
+function normalizePreviousMetrics(raw) {
+  if (!raw || typeof raw !== 'object') {
+    return { schemaVersion: 1, fetchedAt: null, projects: {} };
+  }
+
+  if (raw.projects && typeof raw.projects === 'object') {
+    return {
+      schemaVersion: raw.schemaVersion ?? 1,
+      fetchedAt: raw.fetchedAt ?? null,
+      projects: raw.projects,
+    };
+  }
+
+  // Backward compatibility for the old script shape: { [PROJECT_ID]: { ... } }.
+  return {
+    schemaVersion: 1,
+    fetchedAt: raw.updatedAt ?? null,
+    projects: {
+      [PROJECT_ID]: raw[PROJECT_ID] ?? {},
+    },
+  };
+}
+
+async function readPreviousMetrics() {
   try {
     const raw = await readFile(OUTPUT_FILE, 'utf8');
-    return JSON.parse(raw);
+    return normalizePreviousMetrics(JSON.parse(raw));
   } catch {
-    return {};
+    return { schemaVersion: 1, fetchedAt: null, projects: {} };
   }
 }
 
 async function fetchText(url) {
   const response = await fetch(url, {
     headers: {
-      'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+      accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
       'accept-language': 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7',
       'user-agent': 'Mozilla/5.0 (compatible; PortfolioStatsBot/1.0; +https://github.com/diligencefrozen/Portfolio)',
     },
   });
 
   if (!response.ok) {
-    throw new Error(`Failed to fetch ${url}: ${response.status}`);
+    throw new Error(`HTTP ${response.status}`);
   }
 
   return response.text();
 }
 
-function parseChromeStorePage(html, previous = {}) {
+function parseChromeStorePage(html) {
   const text = cleanText(html);
-  const rating = firstMatch(text, [
+  const userCount = firstNumber(text, [
+    /([0-9][0-9,]*)\s*사용자/i,
+    /([0-9][0-9,]*)\s*users/i,
+  ]);
+  const rating = firstNumber(text, [
     /평균 평점은 별점 5점 중\s*([0-9.]+)점입니다/i,
     /5점 만점에\s*([0-9.]+)점/i,
     /Average rating\s*([0-9.]+)\s*out of 5/i,
   ]);
-  const ratingCount = firstMatch(text, [
-    /평점\s*([0-9,]+)개/i,
-    /([0-9,]+)\s*ratings/i,
+  const ratingCount = firstNumber(text, [
+    /평점\s*([0-9][0-9,]*)개/i,
+    /([0-9][0-9,]*)\s*ratings/i,
   ]);
-  const users = firstMatch(text, [
-    /([0-9,]+)\s*사용자/i,
-    /([0-9,]+)\s*users/i,
-  ]);
-  const isKoreanCategory = text.includes('확장 프로그램');
-  const isToolCategory = text.includes('도구') || /Tools/i.test(text);
 
-  return {
-    users: users ? `${formatNumber(users)} users` : previous.users ?? 'Unknown users',
-    usersKo: users ? `${formatNumber(users)} 사용자` : previous.usersKo ?? '사용자 수 확인 중',
-    rating: rating ? `${rating} / 5.0` : previous.rating ?? 'Rating pending',
-    ratingCount: ratingCount ? `${formatNumber(ratingCount)} ratings` : previous.ratingCount ?? 'Ratings pending',
-    ratingCountKo: ratingCount ? `평점 ${formatNumber(ratingCount)}개` : previous.ratingCountKo ?? '평점 확인 중',
-    category: isKoreanCategory ? 'Extensions' : previous.category ?? 'Extensions',
-    categoryKo: isKoreanCategory ? '확장 프로그램' : previous.categoryKo ?? '확장 프로그램',
-    subcategory: isToolCategory ? 'Productivity / Tools' : previous.subcategory ?? 'Productivity / Tools',
-    subcategoryKo: isToolCategory ? '생산성 / 도구' : previous.subcategoryKo ?? '생산성 / 도구',
-    sourceUrl: STORE_URL,
-  };
+  return removeUndefinedEntries({
+    category: text.includes('확장 프로그램') ? '확장 프로그램' : undefined,
+    subcategory: text.includes('도구') || /Tools/i.test(text) ? '도구' : undefined,
+    userCount: userCount ?? undefined,
+    rating: rating ?? undefined,
+    ratingCount: ratingCount ?? undefined,
+  });
 }
 
 function parseReviewSignals(html, previousReviews = []) {
   const text = cleanText(html);
-  const signals = [];
+  const preservedReviews = Array.isArray(previousReviews) ? previousReviews : [];
 
-  const knownSignals = [
-    {
-      id: 'keyword-hide-mode',
-      keywords: ['키워드', '숨기기', '7.3.14.2026'],
-      fallback: previousReviews.find((review) => review.id === 'keyword-hide-mode'),
-    },
-    {
-      id: 'right-click-blocking',
-      keywords: ['우클릭', '7.3.11.2026'],
-      fallback: previousReviews.find((review) => review.id === 'right-click-blocking'),
-    },
-    {
-      id: 'popup-trigger-fix',
-      keywords: ['닉네임', '팝업', '7.3.12.2026'],
-      fallback: previousReviews.find((review) => review.id === 'popup-trigger-fix'),
-    },
-  ];
+  // Chrome Web Store review markup changes often. Preserve cached review objects,
+  // and only mark them as recently seen when recognizable phrases are still present.
+  return preservedReviews.map((review) => {
+    if (!review?.text) return review;
 
-  for (const signal of knownSignals) {
-    const found = signal.keywords.some((keyword) => text.includes(keyword));
-    if (found && signal.fallback) {
-      signals.push({ ...signal.fallback, lastSeenOnStore: new Date().toISOString() });
+    const recognizableSnippet = review.text.slice(0, 24);
+    if (recognizableSnippet && text.includes(recognizableSnippet)) {
+      return { ...review, lastSeenOnStore: new Date().toISOString() };
     }
-  }
 
-  if (signals.length > 0) {
-    return signals;
-  }
-
-  return previousReviews;
+    return review;
+  });
 }
 
-async function fetchChromeStoreSnapshot(previous = {}) {
-  const html = await fetchText(`${STORE_URL}?hl=ko`);
-  let reviewHtml = html;
-
-  for (const url of STORE_REVIEWS_URLS) {
-    try {
-      reviewHtml = await fetchText(url);
-      break;
-    } catch {
-      // Chrome Web Store routes change often, so keep trying known route shapes.
-    }
-  }
-
-  return {
-    chromeWebStore: parseChromeStorePage(html, previous.chromeWebStore),
-    reviews: parseReviewSignals(reviewHtml, previous.reviews ?? []),
+async function fetchChromeStoreSnapshot(previousProject = {}) {
+  const previousStore = previousProject.chromeWebStore ?? {};
+  const fallback = {
+    ...DEFAULT_CHROME_WEB_STORE,
+    ...previousStore,
+    status: 'fallback',
+    reviews: Array.isArray(previousStore.reviews) ? previousStore.reviews : DEFAULT_CHROME_WEB_STORE.reviews,
   };
+
+  try {
+    const html = await fetchText(`${STORE_URL}?hl=ko`);
+    const parsed = parseChromeStorePage(html);
+    let reviews = fallback.reviews;
+
+    for (const url of STORE_REVIEWS_URLS) {
+      try {
+        const reviewHtml = await fetchText(url);
+        reviews = parseReviewSignals(reviewHtml, fallback.reviews);
+        break;
+      } catch {
+        // Chrome Web Store routes change often. Keep cached reviews if route fetching fails.
+      }
+    }
+
+    const hasParsedMetric = ['userCount', 'rating', 'ratingCount'].some((key) => typeof parsed[key] === 'number');
+
+    return removeUndefinedEntries({
+      ...fallback,
+      ...parsed,
+      status: hasParsedMetric ? 'ok' : 'fallback',
+      sourceUrl: `${STORE_URL}/reviews?hl=ko`,
+      reviews,
+      error: hasParsedMetric ? undefined : 'Chrome Web Store metrics were not found in the fetched page HTML.',
+    });
+  } catch (error) {
+    return {
+      ...fallback,
+      error: error instanceof Error ? error.message : String(error),
+    };
+  }
 }
 
 function parseLastPageFromLinkHeader(linkHeader) {
@@ -161,71 +208,75 @@ function parseLastPageFromLinkHeader(linkHeader) {
   return match?.[1] ? Number(match[1]) : null;
 }
 
-async function fetchGithubSnapshot(previous = {}) {
-  const apiUrl = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/commits?per_page=1`;
-  const response = await fetch(apiUrl, {
-    headers: {
+async function fetchGithubSnapshot(previousProject = {}) {
+  const previousGithub = previousProject.github ?? {};
+  const fallback = {
+    ...DEFAULT_GITHUB,
+    ...previousGithub,
+    status: 'fallback',
+  };
+
+  try {
+    const apiUrl = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/commits?per_page=1`;
+    const headers = {
       accept: 'application/vnd.github+json',
       'x-github-api-version': '2022-11-28',
       'user-agent': 'PortfolioStatsBot/1.0',
-    },
-  });
+    };
 
-  if (!response.ok) {
-    throw new Error(`Failed to fetch GitHub commits: ${response.status}`);
+    if (process.env.GITHUB_TOKEN) {
+      headers.authorization = `Bearer ${process.env.GITHUB_TOKEN}`;
+    }
+
+    const response = await fetch(apiUrl, { headers });
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+
+    const commits = await response.json();
+    const latestCommit = Array.isArray(commits) ? commits[0] : null;
+    const commitCount = parseLastPageFromLinkHeader(response.headers.get('link')) ?? fallback.commitCount;
+
+    return removeUndefinedEntries({
+      ...fallback,
+      status: 'ok',
+      repo: `${GITHUB_OWNER}/${GITHUB_REPO}`,
+      sourceUrl: `https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}`,
+      commitCount,
+      latestCommitAt: latestCommit?.commit?.committer?.date ?? fallback.latestCommitAt,
+      latestCommitMessage: latestCommit?.commit?.message?.split('\n')[0] ?? fallback.latestCommitMessage,
+      latestCommitUrl: latestCommit?.html_url ?? fallback.latestCommitUrl,
+      error: undefined,
+    });
+  } catch (error) {
+    return {
+      ...fallback,
+      error: error instanceof Error ? error.message : String(error),
+    };
   }
-
-  const commits = await response.json();
-  const latestCommit = Array.isArray(commits) ? commits[0] : null;
-  const latestCommitDate = latestCommit?.commit?.committer?.date
-    ? latestCommit.commit.committer.date.slice(0, 10)
-    : previous.latestCommitDate ?? 'Unknown';
-  const commitCount = parseLastPageFromLinkHeader(response.headers.get('link')) ?? previous.commits?.match(/[0-9,]+/)?.[0] ?? 'Unknown';
-  const formattedCommits = typeof commitCount === 'number' ? formatNumber(String(commitCount)) : commitCount;
-
-  return {
-    commits: `${formattedCommits} commits`,
-    commitsKo: `${formattedCommits} Commits`,
-    latestCommitDate,
-    latestSignal: 'Active maintenance',
-    latestSignalKo: '지속 유지보수 중',
-    sourceUrl: `https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}`,
-  };
 }
 
 async function main() {
-  const previous = await readPreviousSnapshot();
-  const previousProject = previous[PROJECT_ID] ?? {};
+  const previous = await readPreviousMetrics();
+  const previousProject = previous.projects?.[PROJECT_ID] ?? {};
 
   const nextProject = {
     ...previousProject,
+    chromeWebStore: await fetchChromeStoreSnapshot(previousProject),
+    github: await fetchGithubSnapshot(previousProject),
   };
-  let didSync = false;
-
-  try {
-    const chromeSnapshot = await fetchChromeStoreSnapshot(previousProject);
-    Object.assign(nextProject, chromeSnapshot);
-    didSync = true;
-  } catch (error) {
-    console.warn(`[sync-project-stats] Chrome Web Store sync skipped: ${error.message}`);
-  }
-
-  try {
-    nextProject.github = await fetchGithubSnapshot(previousProject.github);
-    didSync = true;
-  } catch (error) {
-    console.warn(`[sync-project-stats] GitHub sync skipped: ${error.message}`);
-  }
-
-  if (didSync) {
-    nextProject.updatedAt = new Date().toISOString();
-  }
 
   const next = {
-    ...previous,
-    [PROJECT_ID]: nextProject,
+    schemaVersion: 1,
+    fetchedAt: new Date().toISOString(),
+    projects: {
+      ...previous.projects,
+      [PROJECT_ID]: nextProject,
+    },
   };
 
+  await mkdir(path.dirname(OUTPUT_FILE), { recursive: true });
   await writeFile(OUTPUT_FILE, `${JSON.stringify(next, null, 2)}\n`);
   console.log(`[sync-project-stats] Wrote ${OUTPUT_FILE}`);
 }
