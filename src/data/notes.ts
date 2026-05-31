@@ -250,7 +250,6 @@ const note20260305 = createStudyNote({
   location: '',
   summary: '',
   tags: ['Java', 'JDK', 'JVM', 'Eclipse', 'Console', 'printf'],
-  important: true,
   content: note20260305Content,
 });
 
@@ -262,39 +261,60 @@ const note20260306 = createStudyNote({
   location: '',
   summary: '',
   tags: ['Java', 'JDK', 'JVM', 'Eclipse', 'Console', 'printf'],
-  important: true,
   content: note20260306Content,
 });
 
 // 2026-03-09 / 03092026
 const note20260309 = createStudyNote({
   date: '2026-03-09',
-  month: 'March 2026',
+  category: 'Java / Basic',
+  location: '',
+  summary: '',
+  tags: ['Java', 'JDK', 'JVM', 'Eclipse', 'Console', 'printf'],
+  content: note20260309Content,
 });
 
 // 2026-03-10 / 03102026
 const note20260310 = createStudyNote({
   date: '2026-03-10',
-  month: 'March 2026',
+  category: 'Java / Basic',
+  location: '',
+  summary: '',
+  tags: ['Java', 'JDK', 'JVM', 'Eclipse', 'Console', 'printf'],
+  content: note20260310Content,
 });
 
 // 2026-03-11 / 03112026
 const note20260311 = createStudyNote({
   date: '2026-03-11',
   month: 'March 2026',
+  category: 'Java / Basic',
+  location: '',
+  summary: '',
+  tags: ['Java', 'JDK', 'JVM', 'Eclipse', 'Console', 'printf'],
+  content: note20260311Content,
   important: true,
 });
 
 // 2026-03-12 / 03122026
 const note20260312 = createStudyNote({
   date: '2026-03-12',
-  month: 'March 2026',
+  category: 'Java / Basic',
+  location: '',
+  summary: '',
+  tags: ['Java', 'JDK', 'JVM', 'Eclipse', 'Console', 'printf'],
+  content: note20260312Content,
 });
 
 // 2026-03-13 / 03132026
 const note20260313 = createStudyNote({
   date: '2026-03-13',
   month: 'March 2026',
+  category: 'Java / Basic',
+  location: '',
+  summary: '',
+  tags: ['Java', 'JDK', 'JVM', 'Eclipse', 'Console', 'printf'],
+  content: note20260313Content,
   important: true,
 });
 
@@ -302,6 +322,11 @@ const note20260313 = createStudyNote({
 const note20260317 = createStudyNote({
   date: '2026-03-17',
   month: 'March 2026',
+  category: 'Java / Basic',
+  location: '',
+  summary: '',
+  tags: ['Java', 'JDK', 'JVM', 'Eclipse', 'Console', 'printf'],
+  content: note20260317Content,
 });
 
 // 2026-03-18 / 03182026
@@ -309,18 +334,33 @@ const note20260318 = createStudyNote({
   date: '2026-03-18',
   month: 'March 2026',
   important: true,
+  category: 'Java / Basic',
+  location: '',
+  summary: '',
+  tags: ['Java', 'JDK', 'JVM', 'Eclipse', 'Console', 'printf'],
+  content: note20260318Content,
 });
 
 // 2026-03-19 / 03192026
 const note20260319 = createStudyNote({
   date: '2026-03-19',
   month: 'March 2026',
+  category: 'Java / Basic',
+  location: '',
+  summary: '',
+  tags: ['Java', 'JDK', 'JVM', 'Eclipse', 'Console', 'printf'],
+  content: note20260319Content,
 });
 
 // 2026-03-20 / 03202026
 const note20260320 = createStudyNote({
   date: '2026-03-20',
   month: 'March 2026',
+  category: 'Java / Basic',
+  location: '',
+  summary: '',
+  tags: ['Java', 'JDK', 'JVM', 'Eclipse', 'Console', 'printf'],
+  content: note20260320Content,
 });
 
 // 2026-03-23 / 03232026
@@ -328,12 +368,22 @@ const note20260323 = createStudyNote({
   date: '2026-03-23',
   month: 'March 2026',
   important: true,
+  category: 'Java / Basic',
+  location: '',
+  summary: '',
+  tags: ['Java', 'JDK', 'JVM', 'Eclipse', 'Console', 'printf'],
+  content: note20260323Content,
 });
 
 // 2026-03-24 / 03242026
 const note20260324 = createStudyNote({
   date: '2026-03-24',
   month: 'March 2026',
+  category: 'Java / Basic',
+  location: '',
+  summary: '',
+  tags: ['Java', 'JDK', 'JVM', 'Eclipse', 'Console', 'printf'],
+  content: note20260324Content,
 });
 
 // 2026-03-25 / 03252026
@@ -341,6 +391,11 @@ const note20260325 = createStudyNote({
   date: '2026-03-25',
   month: 'March 2026',
   important: true,
+  category: 'Java / Basic',
+  location: '',
+  summary: '',
+  tags: ['Java', 'JDK', 'JVM', 'Eclipse', 'Console', 'printf'],
+  content: note20260325Content,
 });
 
 // 2026-03-26 / 03262026
@@ -348,6 +403,11 @@ const note20260326 = createStudyNote({
   date: '2026-03-26',
   month: 'March 2026',
   important: true,
+  category: 'Java / Basic',
+  location: '',
+  summary: '',
+  tags: ['Java', 'JDK', 'JVM', 'Eclipse', 'Console', 'printf'],
+  content: note20260326Content,
 });
 
 // 2026-03-27 / 03272026
@@ -355,18 +415,33 @@ const note20260327 = createStudyNote({
   date: '2026-03-27',
   month: 'March 2026',
   important: true,
+  category: 'Java / Basic',
+  location: '',
+  summary: '',
+  tags: ['Java', 'JDK', 'JVM', 'Eclipse', 'Console', 'printf'],
+  content: note20260327Content,
 });
 
 // 2026-03-30 / 03302026
 const note20260330 = createStudyNote({
   date: '2026-03-30',
   month: 'March 2026',
+  category: 'Java / Basic',
+  location: '',
+  summary: '',
+  tags: ['Java', 'JDK', 'JVM', 'Eclipse', 'Console', 'printf'],
+  content: note20260330Content,
 });
 
 // 2026-03-31 / 03312026
 const note20260331 = createStudyNote({
   date: '2026-03-31',
   month: 'March 2026',
+  category: 'Java / Basic',
+  location: '',
+  summary: '',
+  tags: ['Java', 'JDK', 'JVM', 'Eclipse', 'Console', 'printf'],
+  content: note20260331Content,
 });
 
 // -----------------------------------------------------------------------------
