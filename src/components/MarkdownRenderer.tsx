@@ -30,13 +30,13 @@ function renderInline(text: string): ReactNode[] {
 
     if (match[2]) {
       elements.push(
-        <strong key={`strong-${key}`} className="font-semibold text-white">
+        <strong key={`strong-${key}`} className="font-extrabold text-slate-950">
           {match[2]}
         </strong>,
       );
     } else if (match[4]) {
       elements.push(
-        <code key={`code-${key}`} className="rounded bg-slate-900 px-1.5 py-0.5 text-sky-200">
+        <code key={`code-${key}`} className="rounded-md bg-slate-100 px-1.5 py-0.5 text-blue-700">
           {match[4]}
         </code>,
       );
@@ -44,7 +44,7 @@ function renderInline(text: string): ReactNode[] {
       elements.push(
         <a
           key={`link-${key}`}
-          className="text-sky-200 underline decoration-sky-300/40 underline-offset-4 transition hover:text-sky-100"
+          className="font-semibold text-blue-700 underline decoration-blue-300 underline-offset-4 transition hover:text-blue-900"
           href={match[7]}
           target="_blank"
           rel="noreferrer"
@@ -74,7 +74,7 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
     }
 
     blocks.push(
-      <p key={`paragraph-${blockIndex}`} className="leading-8 text-slate-300">
+      <p key={`paragraph-${blockIndex}`} className="leading-8 text-slate-700">
         {renderInline(paragraphLines.join(' '))}
       </p>,
     );
@@ -93,7 +93,7 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
     blocks.push(
       <ListTag
         key={`list-${blockIndex}`}
-        className={`space-y-2 pl-5 text-slate-300 ${isOrdered ? 'list-decimal' : 'list-disc'}`}
+        className={`space-y-2 pl-5 leading-8 text-slate-700 ${isOrdered ? 'list-decimal' : 'list-disc'}`}
       >
         {listItems.map((item) => (
           <li key={`${blockIndex}-${item.text}`}>{renderInline(item.text)}</li>
@@ -128,13 +128,13 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
       }
 
       blocks.push(
-        <div key={`code-${blockIndex}`} className="overflow-hidden rounded-2xl border border-white/10 bg-slate-950">
+        <div key={`code-${blockIndex}`} className="overflow-hidden rounded-2xl border border-slate-200 bg-slate-950 shadow-sm">
           {language && (
-            <div className="border-b border-white/10 px-4 py-2 text-xs uppercase tracking-[0.2em] text-slate-500">
+            <div className="border-b border-white/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] text-slate-400">
               {language}
             </div>
           )}
-          <pre className="overflow-x-auto p-4 text-sm leading-7 text-slate-200">
+          <pre className="overflow-x-auto p-4 text-sm leading-7 text-slate-100">
             <code>{codeLines.join('\n')}</code>
           </pre>
         </div>,
@@ -147,7 +147,7 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
       flushParagraph();
       flushList();
       blocks.push(
-        <h4 key={`h3-${blockIndex}`} className="pt-2 text-lg font-semibold text-white">
+        <h4 key={`h3-${blockIndex}`} className="pt-2 text-lg font-extrabold text-slate-950">
           {renderInline(trimmed.slice(4))}
         </h4>,
       );
@@ -159,7 +159,7 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
       flushParagraph();
       flushList();
       blocks.push(
-        <h3 key={`h2-${blockIndex}`} className="pt-3 text-2xl font-bold text-white">
+        <h3 key={`h2-${blockIndex}`} className="pt-3 text-2xl font-extrabold text-slate-950">
           {renderInline(trimmed.slice(3))}
         </h3>,
       );
@@ -171,7 +171,7 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
       flushParagraph();
       flushList();
       blocks.push(
-        <h2 key={`h1-${blockIndex}`} className="text-3xl font-black tracking-tight text-white">
+        <h2 key={`h1-${blockIndex}`} className="text-3xl font-black tracking-tight text-slate-950">
           {renderInline(trimmed.slice(2))}
         </h2>,
       );
@@ -185,7 +185,7 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
       blocks.push(
         <blockquote
           key={`quote-${blockIndex}`}
-          className="border-l-4 border-sky-300/60 bg-sky-300/10 py-3 pl-4 text-sky-100"
+          className="rounded-r-2xl border-l-4 border-blue-500 bg-blue-50 px-4 py-3 text-blue-900"
         >
           {renderInline(trimmed.slice(2))}
         </blockquote>,
