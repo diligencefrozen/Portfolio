@@ -3,7 +3,7 @@ import { profile } from '../data/profile';
 
 const navigation = [
   { label: 'Home', href: '#home' },
-  { label: 'Career', href: '#career' },
+  { label: 'Experience', href: '#career' },
   { label: 'Projects', href: '#projects' },
   { label: 'Notes', href: '#notes' },
   { label: 'Resume', href: '#resume' },
