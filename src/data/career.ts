@@ -11,7 +11,7 @@ export const careerItems: CareerItem[] = [
   {
     company: 'Personal Project',
     role: 'Built and Maintained DCinside Gallery Blocker',
-    period: '2026',
+    period: '2025-2026',
     location: 'Chrome Extension',
     summary:
       'Developed a lightweight Chrome extension that gives DCinside users more control over unwanted galleries, posts, comments, users, images, and DCCon content.',
