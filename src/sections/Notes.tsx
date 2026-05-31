@@ -2,10 +2,117 @@ import { useEffect, useMemo, useState } from 'react';
 import { CalendarDays, CheckCircle2, FileText, Search, Star } from 'lucide-react';
 import { MarkdownRenderer } from '../components/MarkdownRenderer';
 import { SectionHeading } from '../components/SectionHeading';
-import { notes } from '../data/notes';
+import { notes as importedNotes } from '../data/notes';
 
 const CHECKED_NOTES_STORAGE_KEY = 'portfolio:checked-notes';
 const ALL_MONTHS = 'All';
+
+type RawImportedNote = {
+  id?: string;
+  title?: string;
+  date?: string;
+  month?: string;
+  category?: string;
+  location?: string;
+  summary?: string;
+  tags?: string[];
+  content?: string;
+  important?: boolean;
+  url?: string;
+};
+
+type NormalizedNote = {
+  id: string;
+  title: string;
+  date: string;
+  month: string;
+  category: string;
+  location?: string;
+  summary: string;
+  tags: string[];
+  content: string;
+  important: boolean;
+};
+
+function formatMonthFromDate(date: string) {
+  const parsedDate = new Date(`${date}T00:00:00`);
+
+  if (Number.isNaN(parsedDate.getTime())) {
+    return 'Unsorted';
+  }
+
+  return parsedDate.toLocaleDateString('en-US', {
+    month: 'long',
+    year: 'numeric',
+  });
+}
+
+function createNoteId(note: RawImportedNote, index: number) {
+  const source = `${note.date ?? 'note'}-${note.title ?? index}`;
+
+  return source
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '');
+}
+
+function createDefaultMarkdown(note: RawImportedNote, title: string) {
+  return `# ${title}
+
+## Study Checklist
+
+- Review the main concept from this date.
+- Move the original Notion note into this Markdown field.
+- Add source code, command snippets, screenshots, and troubleshooting notes if needed.
+
+## Key Takeaways
+
+> This page is ready for Markdown migration. Replace this template with the original class note.
+
+### Markdown examples
+
+- **Bold text** for important ideas
+- \`inline code\` for short commands or identifiers
+- Code fences for Java, SQL, JavaScript, or shell commands
+
+\`\`\`java
+// Paste the original code example here.
+public class Example {
+  public static void main(String[] args) {
+    System.out.println("${title}");
+  }
+}
+\`\`\`
+
+${note.url ? `[Original note link](${note.url})` : ''}`;
+}
+
+function normalizeNotes(notes: readonly RawImportedNote[]): NormalizedNote[] {
+  return notes.map((note, index) => {
+    const title = note.title ?? `Study Note ${index + 1}`;
+    const date = note.date ?? 'Undated';
+    const month = note.month ?? formatMonthFromDate(date);
+    const category = note.category ?? 'Study Note';
+    const summary =
+      note.summary ?? `${title} study note. Markdown content can be migrated from the original Notion page.`;
+    const tags = note.tags && note.tags.length > 0 ? note.tags : [category, month.replace(' 2026', '')];
+
+    return {
+      id: note.id ?? createNoteId(note, index),
+      title,
+      date,
+      month,
+      category,
+      location: note.location,
+      summary,
+      tags,
+      content: note.content ?? createDefaultMarkdown(note, title),
+      important: note.important ?? false,
+    };
+  });
+}
+
+const notes = normalizeNotes(importedNotes as readonly RawImportedNote[]);
 
 function readCheckedNoteIds() {
   if (typeof window === 'undefined') {
@@ -198,7 +305,11 @@ export function Notes() {
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center gap-2">
                               <FileText size={15} className="shrink-0 text-slate-500" />
-                              <p className={`truncate text-sm font-semibold ${isChecked ? 'text-slate-500 line-through' : 'text-white'}`}>
+                              <p
+                                className={`truncate text-sm font-semibold ${
+                                  isChecked ? 'text-slate-500 line-through' : 'text-white'
+                                }`}
+                              >
                                 {note.title}
                               </p>
                               {note.important && <Star size={13} className="shrink-0 fill-sky-300 text-sky-300" />}
