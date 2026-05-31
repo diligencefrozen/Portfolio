@@ -27,13 +27,4 @@ export const projects: Project[] = [
     githubUrl: 'https://github.com/diligencefrozen/DCinside-Gallery-Blocker',
     liveUrl: 'https://chromewebstore.google.com/detail/fnfmdbldnhadkadklplhcjcojjiaopgg',
   },
-  {
-    title: 'Developer Portfolio Website',
-    description:
-      'A personal portfolio website designed to present my projects, technical background, and developer profile in a clear and structured way.',
-    impact:
-      'Built with a data-driven structure so profile information, projects, skills, and technical notes can be updated easily. The project is designed with GitHub Pages deployment in mind.',
-    stack: ['TypeScript', 'React', 'Vite', 'Tailwind CSS', 'GitHub Actions'],
-    githubUrl: 'https://github.com/diligencefrozen',
-  },
 ];
