@@ -1,3 +1,5 @@
+import type { Locale } from '../lib/locale';
+
 export type Note = {
   id: string;
   title: string;
@@ -17,7 +19,59 @@ type RawNote = Omit<Note, 'summary' | 'content' | 'tags'> & {
   content?: string;
 };
 
-function buildDefaultContent(note: RawNote) {
+const monthKoMap: Record<string, string> = {
+  'March 2026': '2026년 3월',
+  'April 2026': '2026년 4월',
+  'May 2026': '2026년 5월',
+};
+
+function getLocalizedMonth(month: string, locale: Locale) {
+  return locale === 'ko' ? monthKoMap[month] ?? month : month;
+}
+
+function getLocalizedCategory(category: string, locale: Locale) {
+  if (locale === 'en') {
+    return category;
+  }
+
+  if (category === 'Study Note') {
+    return '학습 노트';
+  }
+
+  return category;
+}
+
+function buildDefaultContent(note: RawNote, locale: Locale) {
+  if (locale === 'ko') {
+    return `# ${note.title}
+
+## 학습 체크리스트
+
+- 이 날짜에 학습한 핵심 개념을 다시 확인합니다.
+- 기존 Notion 필기 내용을 이 Markdown 필드로 옮깁니다.
+- 필요한 경우 소스 코드, 명령어, 스크린샷, 오류 해결 기록을 추가합니다.
+
+## 핵심 정리
+
+> 이 페이지는 Markdown 필기 이전을 위해 준비된 템플릿입니다. 기존 수업 필기 내용으로 교체하면 됩니다.
+
+### Markdown 예시
+
+- 중요한 개념은 **굵게 표시**합니다.
+- 짧은 명령어나 식별자는 \`inline code\`로 표시합니다.
+- Java, SQL, JavaScript, shell 명령어는 코드블럭으로 정리합니다.
+
+\`\`\`java
+// 기존 코드 예제를 여기에 붙여넣으세요.
+public class Example {
+  public static void main(String[] args) {
+    System.out.println("${note.title}");
+  }
+}
+\`\`\`
+`;
+  }
+
   return `# ${note.title}
 
 ## Study Checklist
@@ -45,6 +99,67 @@ public class Example {
 }
 \`\`\`
 `;
+}
+
+function localizeProvidedContent(note: RawNote, locale: Locale) {
+  if (locale === 'ko' && note.id === '2026-05-28') {
+    return `# 05282026
+
+## 예제
+
+### HomeController.java
+
+C:\\Users\\sedu01\\Desktop\\Test\\20260518_eGov\\May28_1_AJAXServer\\src\\main\\java\\com\\beaver\\may281\\HomeController.java
+
+\`\`\`java
+package com.beaver.may281;
+
+import java.text.DateFormat;
+import java.util.Date;
+import java.util.Locale;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+
+@Controller
+public class HomeController {
+  private static final Logger logger = LoggerFactory.getLogger(HomeController.class);
+
+  // 원본 Notion 코드블럭 전체를 여기에 옮기면 됩니다.
+}
+\`\`\`
+
+## 이전 메모
+
+- 이 페이지는 기존 Notion 날짜별 필기와 연결되어 있습니다.
+- Markdown export 파일이 준비되면 placeholder 코드를 실제 수업 코드로 교체하세요.
+`;
+  }
+
+  return note.content;
+}
+
+function buildNote(note: RawNote, locale: Locale): Note {
+  const month = getLocalizedMonth(note.month, locale);
+  const category = getLocalizedCategory(note.category, locale);
+  const providedContent = localizeProvidedContent(note, locale);
+
+  return {
+    ...note,
+    month,
+    category,
+    summary:
+      note.summary ??
+      (locale === 'ko'
+        ? `${note.title} 학습 노트입니다. 기존 Notion 필기 내용을 Markdown으로 옮겨 정리할 수 있습니다.`
+        : `${note.title} study note. Markdown content can be migrated from the original Notion page.`),
+    content: providedContent ?? buildDefaultContent(note, locale),
+    tags: note.tags ?? [category, locale === 'ko' ? month.replace('2026년 ', '').replace('월', '월') : month.replace(' 2026', '')],
+  };
 }
 
 const rawNotes: RawNote[] = [
@@ -151,9 +266,9 @@ public class HomeController {
   { id: '2026-05-29', title: '05292026', date: '2026-05-29', month: 'May 2026', category: 'Study Note' },
 ];
 
-export const notes: Note[] = rawNotes.map((note) => ({
-  summary: note.summary ?? `${note.title} study note. Markdown content can be migrated from the original Notion page.`,
-  content: note.content ?? buildDefaultContent(note),
-  tags: note.tags ?? [note.category, note.month.replace(' 2026', '')],
-  ...note,
-}));
+export const notesByLocale: Record<Locale, Note[]> = {
+  en: rawNotes.map((note) => buildNote(note, 'en')),
+  ko: rawNotes.map((note) => buildNote(note, 'ko')),
+};
+
+export const notes: Note[] = notesByLocale.en;
