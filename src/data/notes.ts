@@ -222,12 +222,24 @@ const note20260304 = createStudyNote({
 const note20260305 = createStudyNote({
   date: '2026-03-05',
   month: 'March 2026',
+  category: 'Java / Basic',
+  location: '',
+  summary: 'Java fundamentals note covering JDK, JVM, Eclipse setup, comments, output methods, escape sequences, and printf formatting.',
+  tags: ['Java', 'JDK', 'JVM', 'Eclipse', 'Console', 'printf'],
+  important: true,
+  content: note20260305Content,
 });
 
 // 2026-03-06 / 03062026
 const note20260306 = createStudyNote({
   date: '2026-03-06',
   month: 'March 2026',
+  category: 'Java / Basic',
+  location: '',
+  summary: 'Java fundamentals note covering JDK, JVM, Eclipse setup, comments, output methods, escape sequences, and printf formatting.',
+  tags: ['Java', 'JDK', 'JVM', 'Eclipse', 'Console', 'printf'],
+  important: true,
+  content: note20260306Content,
 });
 
 // 2026-03-09 / 03092026
