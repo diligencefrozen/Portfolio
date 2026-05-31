@@ -1,15 +1,35 @@
 import { ArrowUpRight } from 'lucide-react';
 import { SectionHeading } from '../components/SectionHeading';
-import { projects } from '../data/projects';
+import { projectsByLocale } from '../data/projects';
+import { useLocale } from '../lib/locale';
+
+const projectsText = {
+  en: {
+    kicker: 'Project',
+    title: 'Featured Project',
+    description:
+      'The portfolio focuses on one representative project: DCinside Gallery Blocker. The goal is to make the main product clear instead of spreading attention across unrelated items.',
+    sourceCode: 'Source Code',
+    chromeWebStore: 'Chrome Web Store',
+  },
+  ko: {
+    kicker: '프로젝트',
+    title: '대표 프로젝트',
+    description:
+      '포트폴리오의 핵심은 DCinside Gallery Blocker 한 가지 대표 프로젝트에 집중하는 것입니다. 여러 항목을 나열하기보다 실제로 만든 제품과 해결한 문제를 명확하게 보여줍니다.',
+    sourceCode: '소스 코드',
+    chromeWebStore: 'Chrome Web Store',
+  },
+};
 
 export function Projects() {
+  const { locale } = useLocale();
+  const projects = projectsByLocale[locale];
+  const text = projectsText[locale];
+
   return (
     <section id="projects" className="section-shell">
-      <SectionHeading
-        kicker="Project"
-        title="Featured Project"
-        description="The portfolio focuses on one representative project: DCinside Gallery Blocker. The goal is to make the main product clear instead of spreading attention across unrelated items."
-      />
+      <SectionHeading kicker={text.kicker} title={text.title} description={text.description} />
 
       <div className="mt-12 grid gap-6">
         {projects.map((project) => (
@@ -37,7 +57,7 @@ export function Projects() {
                   target="_blank"
                   rel="noreferrer"
                 >
-                  Source Code <ArrowUpRight size={15} />
+                  {text.sourceCode} <ArrowUpRight size={15} />
                 </a>
               )}
               {project.liveUrl && (
@@ -47,7 +67,7 @@ export function Projects() {
                   target="_blank"
                   rel="noreferrer"
                 >
-                  Chrome Web Store <ArrowUpRight size={15} />
+                  {text.chromeWebStore} <ArrowUpRight size={15} />
                 </a>
               )}
             </div>

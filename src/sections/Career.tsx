@@ -1,14 +1,30 @@
 import { SectionHeading } from '../components/SectionHeading';
-import { careerItems } from '../data/career';
+import { careerItemsByLocale } from '../data/career';
+import { useLocale } from '../lib/locale';
+
+const careerText = {
+  en: {
+    kicker: 'Experience',
+    title: 'Project-Based Experience',
+    description:
+      'Although I am an entry-level developer, I focus on building real products that solve practical user-facing problems.',
+  },
+  ko: {
+    kicker: '경험',
+    title: '프로젝트 기반 경험',
+    description:
+      '신입 개발자이지만 실제 사용자 문제를 해결하는 제품을 직접 만들고 개선하는 데 집중하고 있습니다.',
+  },
+};
 
 export function Career() {
+  const { locale } = useLocale();
+  const careerItems = careerItemsByLocale[locale];
+  const text = careerText[locale];
+
   return (
     <section id="career" className="section-shell">
-      <SectionHeading
-        kicker="Experience"
-        title="Project-Based Experience"
-        description="Although I am an entry-level developer, I focus on building real products that solve practical user-facing problems."
-      />
+      <SectionHeading kicker={text.kicker} title={text.title} description={text.description} />
 
       <div className="mt-12 space-y-6">
         {careerItems.map((item) => (
