@@ -1,43 +1,31 @@
 import { useEffect, useMemo, useState } from 'react';
-import { BookOpen, CalendarDays, FileText, Layers3, Search, Star } from 'lucide-react';
+import {
+  BookOpen,
+  CalendarDays,
+  Clock3,
+  FileText,
+  Hash,
+  Layers3,
+  Search,
+  Sparkles,
+  Star,
+  Tags,
+} from 'lucide-react';
 import { MarkdownRenderer } from '../components/MarkdownRenderer';
 import { SectionHeading } from '../components/SectionHeading';
-import { notesByLocale } from '../data/notes';
+import { notesByLocale, type Note } from '../data/notes';
 import { useLocale, type Locale } from '../lib/locale';
 
-type RawImportedNote = {
-  id?: string;
-  title?: string;
-  date?: string;
-  month?: string;
-  category?: string;
-  location?: string;
-  summary?: string;
-  tags?: string[];
-  content?: string;
-  important?: boolean;
-  url?: string;
-};
-
-type NormalizedNote = {
+type TocHeading = {
   id: string;
+  level: number;
   title: string;
-  date: string;
-  month: string;
-  category: string;
-  location?: string;
-  summary: string;
-  tags: string[];
-  content: string;
-  important: boolean;
 };
 
 const notesText: Record<
   Locale,
   {
     all: string;
-    unsorted: string;
-    defaultCategory: string;
     sectionKicker: string;
     sectionTitle: string;
     sectionDescription: string;
@@ -50,79 +38,74 @@ const notesText: Record<
     totalNotes: string;
     visibleNotes: string;
     selectedMonth: string;
+    categories: string;
+    allCategories: string;
+    readTime: string;
+    tableOfContents: string;
+    noToc: string;
+    markdownNote: string;
     emptyState: string;
-    defaultSummary: (title: string) => string;
-    defaultTitle: (index: number) => string;
   }
 > = {
   en: {
     all: 'All',
-    unsorted: 'Unsorted',
-    defaultCategory: 'Study Note',
-    sectionKicker: 'Study Library',
-    sectionTitle: 'Clean, Date-Based Learning Notes',
+    sectionKicker: 'Engineering Notes',
+    sectionTitle: 'A modern knowledge base for daily engineering study',
     sectionDescription:
-      'A fast, readable knowledge library for daily study notes. Pick a month, search by topic, and open each Markdown note without unnecessary checklist UI.',
-    searchPlaceholder: 'Search date, title, category, tag, or topic...',
-    library: 'Note Library',
-    libraryHint: 'Choose a date to open the full note.',
+      'Markdown notes are loaded into a clean, Notion-inspired reading system with search, filters, topic cards, reading time, and a table of contents.',
+    searchPlaceholder: 'Search title, date, category, tag, or topic...',
+    library: 'Knowledge Library',
+    libraryHint: 'Filter, scan, and open each Markdown note like a living technical document.',
     notesSuffix: 'notes',
-    activeNote: 'Active Note',
-    important: 'Important',
+    activeNote: 'Active Document',
+    important: 'Priority Note',
     totalNotes: 'Total notes',
     visibleNotes: 'Visible notes',
     selectedMonth: 'Selected month',
+    categories: 'Categories',
+    allCategories: 'All categories',
+    readTime: 'min read',
+    tableOfContents: 'On this page',
+    noToc: 'Short note — no sections yet.',
+    markdownNote: 'Markdown Document',
     emptyState: 'No notes match this filter.',
-    defaultSummary: (title) => `${title} study note. Markdown content can be migrated from the original Notion page.`,
-    defaultTitle: (index) => `Study Note ${index + 1}`,
   },
   ko: {
     all: '전체',
-    unsorted: '미분류',
-    defaultCategory: '학습 노트',
-    sectionKicker: '학습 라이브러리',
-    sectionTitle: '깔끔한 날짜별 학습 노트',
+    sectionKicker: 'Engineering Notes',
+    sectionTitle: '현대적인 엔지니어링 지식 베이스',
     sectionDescription:
-      '매일 쌓이는 수업 필기를 빠르게 찾고 읽기 위한 지식 라이브러리입니다. 불필요한 체크박스 없이 월별 필터, 검색, Markdown 본문 읽기에 집중합니다.',
-    searchPlaceholder: '날짜, 제목, 카테고리, 태그, 주제로 검색...',
-    library: '노트 라이브러리',
-    libraryHint: '날짜를 선택하면 전체 필기본을 볼 수 있습니다.',
+      'Markdown 필기를 Notion스럽고 직관적인 문서 시스템으로 불러옵니다. 검색, 월별 필터, 카테고리, 읽는 시간, 목차를 한 화면에서 확인할 수 있습니다.',
+    searchPlaceholder: '제목, 날짜, 카테고리, 태그, 주제로 검색...',
+    library: 'Knowledge Library',
+    libraryHint: '필기를 파일 목록이 아니라 살아있는 기술 문서처럼 탐색합니다.',
     notesSuffix: '개 노트',
-    activeNote: '현재 노트',
-    important: '중요',
+    activeNote: '현재 문서',
+    important: '중요 노트',
     totalNotes: '전체 노트',
     visibleNotes: '현재 표시',
     selectedMonth: '선택 월',
+    categories: '카테고리',
+    allCategories: '전체 카테고리',
+    readTime: '분 읽기',
+    tableOfContents: '문서 목차',
+    noToc: '짧은 노트라 목차가 없습니다.',
+    markdownNote: 'Markdown 문서',
     emptyState: '조건에 맞는 노트가 없습니다.',
-    defaultSummary: (title) => `${title} 학습 노트입니다. 기존 Notion 필기 내용을 Markdown으로 옮겨 정리할 수 있습니다.`,
-    defaultTitle: (index) => `학습 노트 ${index + 1}`,
   },
 };
-
-function formatMonthFromDate(date: string, locale: Locale) {
-  const parsedDate = new Date(`${date}T00:00:00`);
-
-  if (Number.isNaN(parsedDate.getTime())) {
-    return notesText[locale].unsorted;
-  }
-
-  return parsedDate.toLocaleDateString(locale === 'ko' ? 'ko-KR' : 'en-US', {
-    month: 'long',
-    year: 'numeric',
-  });
-}
 
 function formatDateLabel(date: string, locale: Locale) {
   const parsedDate = new Date(`${date}T00:00:00`);
 
   if (Number.isNaN(parsedDate.getTime())) {
-    return date;
+    return { eyebrow: 'Note', value: date };
   }
 
-  return parsedDate.toLocaleDateString(locale === 'ko' ? 'ko-KR' : 'en-US', {
-    month: 'short',
-    day: 'numeric',
-  });
+  const month = parsedDate.toLocaleDateString(locale === 'ko' ? 'ko-KR' : 'en-US', { month: 'short' });
+  const day = parsedDate.toLocaleDateString(locale === 'ko' ? 'ko-KR' : 'en-US', { day: 'numeric' });
+
+  return { eyebrow: month, value: day };
 }
 
 function formatLongDate(date: string, locale: Locale) {
@@ -140,97 +123,89 @@ function formatLongDate(date: string, locale: Locale) {
   });
 }
 
-function createNoteId(note: RawImportedNote, index: number) {
-  const source = `${note.date ?? 'note'}-${note.title ?? index}`;
+function calculateReadMinutes(content: string) {
+  const withoutCode = content.replace(/```[\s\S]*?```/g, ' ');
+  const englishWords = withoutCode.match(/[A-Za-z0-9_]+/g)?.length ?? 0;
+  const koreanChars = withoutCode.match(/[가-힣]/g)?.length ?? 0;
+  const estimatedWords = englishWords + koreanChars / 2.8;
 
-  return source
+  return Math.max(1, Math.ceil(estimatedWords / 220));
+}
+
+function slugify(text: string) {
+  return text
     .toLowerCase()
-    .replace(/[^a-z0-9가-힣]+/g, '-')
+    .trim()
+    .replace(/[`*_~()[\]{}:;,.!?/\\]+/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
     .replace(/^-|-$/g, '');
 }
 
-function createDefaultMarkdown(note: RawImportedNote, title: string, locale: Locale) {
-  if (locale === 'ko') {
-    return `# ${title}
-
-## 핵심 정리
-
-> 이 페이지는 Markdown 이전을 위해 준비된 템플릿입니다. 기존 수업 필기 내용으로 교체하면 됩니다.
-
-### 작성 가이드
-
-- 중요한 내용은 **굵게 표시**합니다.
-- 짧은 명령어와 식별자는 \`inline code\`로 표시합니다.
-- Java, SQL, JavaScript, shell 코드는 코드블럭으로 정리합니다.
-
-\`\`\`java
-// 기존 코드 예제를 여기에 붙여넣으세요.
-public class Example {
-  public static void main(String[] args) {
-    System.out.println("${title}");
-  }
-}
-\`\`\`
-
-${note.url ? `[원본 노트 링크](${note.url})` : ''}`;
-  }
-
-  return `# ${title}
-
-## Key Takeaways
-
-> This page is ready for Markdown migration. Replace this template with the original class note.
-
-### Writing Guide
-
-- **Bold text** for important ideas
-- \`inline code\` for short commands or identifiers
-- Code fences for Java, SQL, JavaScript, or shell commands
-
-\`\`\`java
-// Paste the original code example here.
-public class Example {
-  public static void main(String[] args) {
-    System.out.println("${title}");
-  }
-}
-\`\`\`
-
-${note.url ? `[Original note link](${note.url})` : ''}`;
+function cleanHeadingText(text: string) {
+  return text.replace(/^#+\s+/, '').replace(/^\d+(?:[-.)]|\.\s*)\s*/, '').trim();
 }
 
-function normalizeNotes(notes: readonly RawImportedNote[], locale: Locale): NormalizedNote[] {
-  const text = notesText[locale];
+function extractToc(content: string): TocHeading[] {
+  const usedIds = new Map<string, number>();
 
-  return notes.map((note, index) => {
-    const title = note.title ?? text.defaultTitle(index);
-    const date = note.date ?? (locale === 'ko' ? '날짜 없음' : 'Undated');
-    const month = note.month ?? formatMonthFromDate(date, locale);
-    const category = note.category ?? text.defaultCategory;
-    const summary = note.summary ?? text.defaultSummary(title);
-    const tags = note.tags && note.tags.length > 0 ? note.tags : [category, month.replace(' 2026', '').replace('2026년 ', '')];
+  return content
+    .split('\n')
+    .map((line) => line.trim())
+    .filter((line) => /^#{2,3}\s+\S/.test(line))
+    .map((line) => {
+      const level = line.startsWith('###') ? 3 : 2;
+      const title = cleanHeadingText(line);
+      const baseId = slugify(title) || `section-${usedIds.size + 1}`;
+      const seenCount = usedIds.get(baseId) ?? 0;
+      usedIds.set(baseId, seenCount + 1);
 
-    return {
-      id: note.id ?? createNoteId(note, index),
-      title,
-      date,
-      month,
-      category,
-      location: note.location,
-      summary,
-      tags,
-      content: note.content ?? createDefaultMarkdown(note, title, locale),
-      important: note.important ?? false,
-    };
-  });
+      return {
+        id: seenCount === 0 ? baseId : `${baseId}-${seenCount + 1}`,
+        level,
+        title,
+      };
+    })
+    .filter((heading) => heading.title.length > 0)
+    .slice(0, 12);
+}
+
+function getMonthValue(month: string) {
+  const englishMonth = month.match(/^([A-Za-z]+)\s+(\d{4})$/);
+  if (englishMonth) {
+    const monthIndex = new Date(`${englishMonth[1]} 1, ${englishMonth[2]}`).getMonth();
+    return Number(englishMonth[2]) * 100 + monthIndex + 1;
+  }
+
+  const koreanMonth = month.match(/(\d{4})년\s*(\d{1,2})월/);
+  if (koreanMonth) {
+    return Number(koreanMonth[1]) * 100 + Number(koreanMonth[2]);
+  }
+
+  return 0;
+}
+
+function scrollToHeading(id: string) {
+  document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 export function Notes() {
   const { locale } = useLocale();
   const text = notesText[locale];
-  const notes = useMemo(() => normalizeNotes(notesByLocale[locale], locale), [locale]);
-  const months = useMemo(() => [...new Set(notes.map((note) => note.month))], [notes]);
+  const notes = useMemo(
+    () => [...notesByLocale[locale]].sort((a, b) => b.date.localeCompare(a.date)),
+    [locale],
+  );
+  const months = useMemo(
+    () => [...new Set(notes.map((note) => note.month))].sort((a, b) => getMonthValue(b) - getMonthValue(a)),
+    [notes],
+  );
+  const categories = useMemo(
+    () => [...new Set(notes.map((note) => note.category))].sort((a, b) => a.localeCompare(b)),
+    [notes],
+  );
   const [activeMonth, setActiveMonth] = useState(text.all);
+  const [activeCategory, setActiveCategory] = useState(text.allCategories);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedNoteId, setSelectedNoteId] = useState(notes[0]?.id ?? '');
 
@@ -239,6 +214,12 @@ export function Notes() {
       setActiveMonth(text.all);
     }
   }, [activeMonth, months, text.all]);
+
+  useEffect(() => {
+    if (activeCategory !== text.allCategories && !categories.includes(activeCategory)) {
+      setActiveCategory(text.allCategories);
+    }
+  }, [activeCategory, categories, text.allCategories]);
 
   useEffect(() => {
     if (notes.length > 0 && !notes.some((note) => note.id === selectedNoteId)) {
@@ -251,6 +232,7 @@ export function Notes() {
 
     return notes.filter((note) => {
       const matchesMonth = activeMonth === text.all || note.month === activeMonth;
+      const matchesCategory = activeCategory === text.allCategories || note.category === activeCategory;
       const searchableText = [
         note.title,
         note.date,
@@ -258,16 +240,16 @@ export function Notes() {
         note.category,
         note.location ?? '',
         note.summary,
-        note.content.slice(0, 800),
+        note.content.slice(0, 1600),
         ...note.tags,
       ]
         .join(' ')
         .toLowerCase();
       const matchesSearch = normalizedQuery.length === 0 || searchableText.includes(normalizedQuery);
 
-      return matchesMonth && matchesSearch;
+      return matchesMonth && matchesCategory && matchesSearch;
     });
-  }, [activeMonth, notes, searchQuery, text.all]);
+  }, [activeCategory, activeMonth, notes, searchQuery, text.all, text.allCategories]);
 
   const groupedNotes = useMemo(
     () =>
@@ -286,8 +268,10 @@ export function Notes() {
     }
   }, [filteredNotes, selectedNoteId]);
 
-  const selectedNote = filteredNotes.find((note) => note.id === selectedNoteId) ?? filteredNotes[0] ?? notes[0];
+  const selectedNote: Note | undefined = filteredNotes.find((note) => note.id === selectedNoteId) ?? filteredNotes[0] ?? notes[0];
   const selectedMonthLabel = activeMonth === text.all ? text.all : activeMonth;
+  const toc = useMemo(() => (selectedNote ? extractToc(selectedNote.content) : []), [selectedNote]);
+  const selectedReadMinutes = selectedNote ? calculateReadMinutes(selectedNote.content) : 0;
 
   return (
     <section id="notes" className="section-shell">
@@ -312,47 +296,84 @@ export function Notes() {
         </div>
       </div>
 
-      <div className="mt-8 flex gap-3 overflow-x-auto pb-2">
-        <button
-          type="button"
-          onClick={() => setActiveMonth(text.all)}
-          className={`shrink-0 rounded-full px-5 py-2.5 text-sm font-extrabold transition ${
-            activeMonth === text.all
-              ? 'bg-slate-950 text-white shadow-lg shadow-slate-950/10'
-              : 'border border-slate-200 bg-white text-slate-700 hover:border-slate-400 hover:text-slate-950'
-          }`}
-        >
-          {text.all}
-        </button>
+      <div className="mt-8 rounded-[2rem] border border-slate-200 bg-white/90 p-4 shadow-[0_24px_80px_rgba(15,23,42,0.07)] backdrop-blur">
+        <label className="flex items-center gap-3 rounded-[1.35rem] border border-slate-200 bg-slate-50 px-5 py-4 text-slate-700 transition focus-within:border-blue-300 focus-within:bg-white focus-within:ring-4 focus-within:ring-blue-100">
+          <Search size={19} className="text-slate-400" />
+          <input
+            type="search"
+            value={searchQuery}
+            onChange={(event) => setSearchQuery(event.target.value)}
+            placeholder={text.searchPlaceholder}
+            className="w-full bg-transparent text-sm font-semibold text-slate-950 outline-none placeholder:text-slate-400"
+          />
+        </label>
 
-        {months.map((month) => (
+        <div className="mt-4 flex gap-3 overflow-x-auto pb-1">
           <button
-            key={month}
             type="button"
-            onClick={() => setActiveMonth(month)}
+            onClick={() => setActiveMonth(text.all)}
             className={`shrink-0 rounded-full px-5 py-2.5 text-sm font-extrabold transition ${
-              activeMonth === month
+              activeMonth === text.all
                 ? 'bg-slate-950 text-white shadow-lg shadow-slate-950/10'
                 : 'border border-slate-200 bg-white text-slate-700 hover:border-slate-400 hover:text-slate-950'
             }`}
           >
-            {month}
+            {text.all}
           </button>
-        ))}
+
+          {months.map((month) => (
+            <button
+              key={month}
+              type="button"
+              onClick={() => setActiveMonth(month)}
+              className={`shrink-0 rounded-full px-5 py-2.5 text-sm font-extrabold transition ${
+                activeMonth === month
+                  ? 'bg-slate-950 text-white shadow-lg shadow-slate-950/10'
+                  : 'border border-slate-200 bg-white text-slate-700 hover:border-slate-400 hover:text-slate-950'
+              }`}
+            >
+              {month}
+            </button>
+          ))}
+        </div>
+
+        <div className="mt-4 border-t border-slate-100 pt-4">
+          <p className="mb-3 inline-flex items-center gap-2 text-xs font-black uppercase tracking-[0.2em] text-slate-400">
+            <Tags size={14} />
+            {text.categories}
+          </p>
+          <div className="flex gap-2 overflow-x-auto pb-1">
+            <button
+              type="button"
+              onClick={() => setActiveCategory(text.allCategories)}
+              className={`shrink-0 rounded-full px-4 py-2 text-xs font-black transition ${
+                activeCategory === text.allCategories
+                  ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/15'
+                  : 'border border-slate-200 bg-white text-slate-600 hover:border-blue-200 hover:text-blue-700'
+              }`}
+            >
+              {text.allCategories}
+            </button>
+
+            {categories.map((category) => (
+              <button
+                key={category}
+                type="button"
+                onClick={() => setActiveCategory(category)}
+                className={`shrink-0 rounded-full px-4 py-2 text-xs font-black transition ${
+                  activeCategory === category
+                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/15'
+                    : 'border border-slate-200 bg-white text-slate-600 hover:border-blue-200 hover:text-blue-700'
+                }`}
+              >
+                {category}
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
 
-      <label className="mt-5 flex items-center gap-3 rounded-[1.5rem] border border-slate-200 bg-white px-5 py-4 text-slate-700 shadow-sm transition focus-within:border-blue-300 focus-within:ring-4 focus-within:ring-blue-100">
-        <Search size={19} className="text-slate-400" />
-        <input
-          type="search"
-          value={searchQuery}
-          onChange={(event) => setSearchQuery(event.target.value)}
-          placeholder={text.searchPlaceholder}
-          className="w-full bg-transparent text-sm font-semibold text-slate-950 outline-none placeholder:text-slate-400"
-        />
-      </label>
-
-      <div className="mt-8 grid gap-6 xl:grid-cols-[0.82fr_1.18fr]">
+      <div className="mt-8 grid gap-6 xl:grid-cols-[0.78fr_1.22fr]">
         <aside className="rounded-[2rem] border border-slate-200 bg-white/90 p-4 shadow-[0_24px_80px_rgba(15,23,42,0.07)] backdrop-blur">
           <div className="flex items-center justify-between gap-3 border-b border-slate-100 px-2 pb-4">
             <div>
@@ -367,7 +388,7 @@ export function Notes() {
             </span>
           </div>
 
-          <div className="mt-4 max-h-[48rem] space-y-5 overflow-y-auto pr-1">
+          <div className="mt-4 max-h-[52rem] space-y-5 overflow-y-auto pr-1">
             {groupedNotes.length === 0 && (
               <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-6 text-center text-sm font-semibold text-slate-500">
                 {text.emptyState}
@@ -386,6 +407,8 @@ export function Notes() {
                 <div className="grid gap-2">
                   {group.notes.map((note) => {
                     const isSelected = selectedNote?.id === note.id;
+                    const dateLabel = formatDateLabel(note.date, locale);
+                    const readMinutes = calculateReadMinutes(note.content);
 
                     return (
                       <button
@@ -405,11 +428,9 @@ export function Notes() {
                             }`}
                           >
                             <span className="text-[0.68rem] font-black uppercase tracking-[0.18em] opacity-70">
-                              {formatDateLabel(note.date, locale).split(' ')[0]}
+                              {dateLabel.eyebrow}
                             </span>
-                            <span className="text-xl font-black leading-none tracking-tight">
-                              {formatDateLabel(note.date, locale).split(' ').slice(1).join(' ') || formatDateLabel(note.date, locale)}
-                            </span>
+                            <span className="text-xl font-black leading-none tracking-tight">{dateLabel.value}</span>
                           </div>
 
                           <div className="min-w-0 flex-1">
@@ -422,7 +443,7 @@ export function Notes() {
                               )}
                             </div>
                             <p className={`mt-1 text-xs font-bold ${isSelected ? 'text-white/60' : 'text-slate-500'}`}>
-                              {note.category}
+                              {note.category} · {readMinutes} {text.readTime}
                             </p>
                             <p className={`mt-2 line-clamp-2 text-xs leading-5 ${isSelected ? 'text-white/72' : 'text-slate-500'}`}>
                               {note.summary}
@@ -439,8 +460,8 @@ export function Notes() {
         </aside>
 
         {selectedNote && (
-          <article className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-[0_24px_80px_rgba(15,23,42,0.08)] xl:sticky xl:top-28 xl:max-h-[52rem] xl:overflow-y-auto">
-            <div className="rounded-[1.75rem] border border-slate-200 bg-[linear-gradient(135deg,_#0f172a_0%,_#1e293b_55%,_#2563eb_100%)] p-6 text-white shadow-xl shadow-slate-950/10">
+          <article className="rounded-[2rem] border border-slate-200 bg-white p-5 shadow-[0_24px_80px_rgba(15,23,42,0.08)] xl:sticky xl:top-28 xl:max-h-[56rem] xl:overflow-y-auto sm:p-6">
+            <div className="rounded-[1.75rem] border border-slate-200 bg-[radial-gradient(circle_at_top_right,_rgba(59,130,246,0.55),_transparent_18rem),linear-gradient(135deg,_#0f172a_0%,_#1e293b_58%,_#111827_100%)] p-6 text-white shadow-xl shadow-slate-950/10">
               <div className="flex flex-col justify-between gap-5 md:flex-row md:items-start">
                 <div className="min-w-0">
                   <p className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-black uppercase tracking-[0.22em] text-white/80">
@@ -450,10 +471,16 @@ export function Notes() {
                   <h3 className="mt-5 text-4xl font-black leading-tight tracking-[-0.04em] text-white sm:text-5xl">
                     {selectedNote.title}
                   </h3>
-                  <p className="mt-3 inline-flex items-center gap-2 text-sm font-bold text-white/72">
-                    <CalendarDays size={16} />
-                    {formatLongDate(selectedNote.date, locale)}
-                  </p>
+                  <div className="mt-4 flex flex-wrap gap-3 text-sm font-bold text-white/72">
+                    <span className="inline-flex items-center gap-2">
+                      <CalendarDays size={16} />
+                      {formatLongDate(selectedNote.date, locale)}
+                    </span>
+                    <span className="inline-flex items-center gap-2">
+                      <Clock3 size={16} />
+                      {selectedReadMinutes} {text.readTime}
+                    </span>
+                  </div>
                 </div>
 
                 {selectedNote.important && (
@@ -468,7 +495,7 @@ export function Notes() {
             <div className="mt-5 flex flex-wrap gap-2">
               <span className="badge">{selectedNote.category}</span>
               {selectedNote.location && <span className="badge">{selectedNote.location}</span>}
-              {selectedNote.tags.map((tag) => (
+              {selectedNote.tags.slice(0, 8).map((tag) => (
                 <span key={tag} className="badge">
                   {tag}
                 </span>
@@ -479,12 +506,44 @@ export function Notes() {
               {selectedNote.summary}
             </p>
 
-            <div className="mt-8 rounded-[1.75rem] border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
-              <div className="mb-6 flex items-center gap-2 border-b border-slate-100 pb-4 text-xs font-black uppercase tracking-[0.22em] text-slate-400">
-                <FileText size={15} />
-                Markdown Note
+            <div className="mt-8 grid gap-5 lg:grid-cols-[minmax(0,1fr)_13rem]">
+              <div className="rounded-[1.75rem] border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
+                <div className="mb-6 flex items-center gap-2 border-b border-slate-100 pb-4 text-xs font-black uppercase tracking-[0.22em] text-slate-400">
+                  <FileText size={15} />
+                  {text.markdownNote}
+                </div>
+                <MarkdownRenderer content={selectedNote.content} />
               </div>
-              <MarkdownRenderer content={selectedNote.content} />
+
+              <aside className="h-fit rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4 lg:sticky lg:top-4">
+                <p className="mb-3 inline-flex items-center gap-2 text-xs font-black uppercase tracking-[0.18em] text-slate-400">
+                  <Hash size={14} />
+                  {text.tableOfContents}
+                </p>
+                {toc.length > 0 ? (
+                  <nav className="space-y-1">
+                    {toc.map((heading) => (
+                      <button
+                        key={heading.id}
+                        type="button"
+                        onClick={() => scrollToHeading(heading.id)}
+                        className={`block w-full rounded-xl px-3 py-2 text-left text-xs font-bold leading-5 text-slate-600 transition hover:bg-white hover:text-blue-700 ${
+                          heading.level === 3 ? 'pl-6' : ''
+                        }`}
+                      >
+                        {heading.title}
+                      </button>
+                    ))}
+                  </nav>
+                ) : (
+                  <p className="rounded-xl bg-white p-3 text-xs font-semibold leading-5 text-slate-500">{text.noToc}</p>
+                )}
+              </aside>
+            </div>
+
+            <div className="mt-5 flex items-center gap-2 rounded-[1.5rem] border border-blue-100 bg-blue-50 px-4 py-3 text-xs font-bold text-blue-700">
+              <Sparkles size={15} />
+              <span>{locale === 'ko' ? '새 md 파일을 noteContents에 넣으면 이 시스템에 자동으로 추가됩니다.' : 'Drop a new md file into noteContents and it joins this system automatically.'}</span>
             </div>
           </article>
         )}
