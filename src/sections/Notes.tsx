@@ -274,7 +274,7 @@ export function Notes() {
   const selectedReadMinutes = selectedNote ? calculateReadMinutes(selectedNote.content) : 0;
 
   return (
-    <section id="notes" className="section-shell">
+    <section id="notes" className="section-shell !max-w-[88rem]">
       <SectionHeading
         kicker={text.sectionKicker}
         title={text.sectionTitle}
@@ -373,8 +373,8 @@ export function Notes() {
         </div>
       </div>
 
-      <div className="mt-8 grid gap-6 xl:grid-cols-[0.78fr_1.22fr]">
-        <aside className="rounded-[2rem] border border-slate-200 bg-white/90 p-4 shadow-[0_24px_80px_rgba(15,23,42,0.07)] backdrop-blur">
+      <div className="mt-8 grid gap-6 xl:grid-cols-[24rem_minmax(0,1fr)] 2xl:grid-cols-[26rem_minmax(0,1fr)]">
+        <aside className="min-w-0 rounded-[2rem] border border-slate-200 bg-white/90 p-4 shadow-[0_24px_80px_rgba(15,23,42,0.07)] backdrop-blur">
           <div className="flex items-center justify-between gap-3 border-b border-slate-100 px-2 pb-4">
             <div>
               <p className="inline-flex items-center gap-2 text-sm font-black text-slate-950">
@@ -435,7 +435,7 @@ export function Notes() {
 
                           <div className="min-w-0 flex-1">
                             <div className="flex items-start gap-2">
-                              <h3 className={`text-base font-black leading-snug tracking-tight ${isSelected ? 'text-white' : 'text-slate-950'}`}>
+                              <h3 className={`break-words text-base font-black leading-snug tracking-tight ${isSelected ? 'text-white' : 'text-slate-950'}`}>
                                 {note.title}
                               </h3>
                               {note.important && (
@@ -460,7 +460,7 @@ export function Notes() {
         </aside>
 
         {selectedNote && (
-          <article className="rounded-[2rem] border border-slate-200 bg-white p-5 shadow-[0_24px_80px_rgba(15,23,42,0.08)] xl:sticky xl:top-28 xl:max-h-[56rem] xl:overflow-y-auto sm:p-6">
+          <article className="min-w-0 rounded-[2rem] border border-slate-200 bg-white p-5 shadow-[0_24px_80px_rgba(15,23,42,0.08)] sm:p-6">
             <div className="rounded-[1.75rem] border border-slate-200 bg-[radial-gradient(circle_at_top_right,_rgba(59,130,246,0.55),_transparent_18rem),linear-gradient(135deg,_#0f172a_0%,_#1e293b_58%,_#111827_100%)] p-6 text-white shadow-xl shadow-slate-950/10">
               <div className="flex flex-col justify-between gap-5 md:flex-row md:items-start">
                 <div className="min-w-0">
@@ -506,29 +506,21 @@ export function Notes() {
               {selectedNote.summary}
             </p>
 
-            <div className="mt-8 grid gap-5 lg:grid-cols-[minmax(0,1fr)_13rem]">
-              <div className="rounded-[1.75rem] border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
-                <div className="mb-6 flex items-center gap-2 border-b border-slate-100 pb-4 text-xs font-black uppercase tracking-[0.22em] text-slate-400">
-                  <FileText size={15} />
-                  {text.markdownNote}
-                </div>
-                <MarkdownRenderer content={selectedNote.content} />
-              </div>
-
-              <aside className="h-fit rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4 lg:sticky lg:top-4">
+            <div className="mt-8 space-y-5">
+              <aside className="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4">
                 <p className="mb-3 inline-flex items-center gap-2 text-xs font-black uppercase tracking-[0.18em] text-slate-400">
                   <Hash size={14} />
                   {text.tableOfContents}
                 </p>
                 {toc.length > 0 ? (
-                  <nav className="space-y-1">
+                  <nav className="flex flex-wrap gap-2">
                     {toc.map((heading) => (
                       <button
                         key={heading.id}
                         type="button"
                         onClick={() => scrollToHeading(heading.id)}
-                        className={`block w-full rounded-xl px-3 py-2 text-left text-xs font-bold leading-5 text-slate-600 transition hover:bg-white hover:text-blue-700 ${
-                          heading.level === 3 ? 'pl-6' : ''
+                        className={`rounded-full border border-slate-200 bg-white px-3 py-2 text-left text-xs font-bold leading-5 text-slate-600 transition hover:border-blue-200 hover:text-blue-700 ${
+                          heading.level === 3 ? 'opacity-80' : ''
                         }`}
                       >
                         {heading.title}
@@ -539,6 +531,14 @@ export function Notes() {
                   <p className="rounded-xl bg-white p-3 text-xs font-semibold leading-5 text-slate-500">{text.noToc}</p>
                 )}
               </aside>
+
+              <div className="min-w-0 rounded-[1.75rem] border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
+                <div className="mb-6 flex items-center gap-2 border-b border-slate-100 pb-4 text-xs font-black uppercase tracking-[0.22em] text-slate-400">
+                  <FileText size={15} />
+                  {text.markdownNote}
+                </div>
+                <MarkdownRenderer content={selectedNote.content} />
+              </div>
             </div>
 
             <div className="mt-5 flex items-center gap-2 rounded-[1.5rem] border border-blue-100 bg-blue-50 px-4 py-3 text-xs font-bold text-blue-700">
