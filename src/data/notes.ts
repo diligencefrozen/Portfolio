@@ -19,6 +19,10 @@ type RawNote = Omit<Note, 'summary' | 'content' | 'tags'> & {
   content?: string;
 };
 
+type Frontmatter = Partial<Pick<Note, 'title' | 'date' | 'month' | 'category' | 'location' | 'summary' | 'important'>> & {
+  tags?: string[];
+};
+
 const noteContentModules = import.meta.glob<string>('./noteContents/*.md', {
   eager: true,
   query: '?raw',
@@ -72,8 +76,8 @@ const monthEnNames = [
 ];
 
 function getCompactDateTitle(date: string) {
-  const [year, month, day] = date.split('-');
-  return `${month}${day}${year}`;
+  const [, month, day] = date.split('-');
+  return `${month}/${day}`;
 }
 
 function getMonthFromDate(date: string) {
@@ -98,10 +102,59 @@ function getLocalizedCategory(category: string, locale: Locale) {
     'Database / SQL': 'Database / SQL',
     'Web / API': 'Web / API',
     'Python / AI': 'Python / AI',
+    'Project Build': '프로젝트 빌드',
     'Study Note': '학습 노트',
   };
 
   return koCategoryMap[category] ?? category;
+}
+
+function parseFrontmatter(rawContent: string): { frontmatter: Frontmatter; body: string } {
+  if (!rawContent.startsWith('---')) {
+    return { frontmatter: {}, body: rawContent };
+  }
+
+  const endIndex = rawContent.indexOf('\n---', 3);
+
+  if (endIndex === -1) {
+    return { frontmatter: {}, body: rawContent };
+  }
+
+  const frontmatterRaw = rawContent.slice(3, endIndex).trim();
+  const body = rawContent.slice(endIndex + 4).trim();
+  const frontmatter: Frontmatter = {};
+
+  frontmatterRaw.split('\n').forEach((line) => {
+    const [key, ...valueParts] = line.split(':');
+    const value = valueParts.join(':').trim().replace(/^['"]|['"]$/g, '');
+
+    if (!key || value.length === 0) {
+      return;
+    }
+
+    const normalizedKey = key.trim() as keyof Frontmatter;
+
+    if (normalizedKey === 'tags') {
+      frontmatter.tags = value
+        .replace(/^\[/, '')
+        .replace(/\]$/, '')
+        .split(',')
+        .map((tag) => tag.trim().replace(/^['"]|['"]$/g, ''))
+        .filter(Boolean);
+      return;
+    }
+
+    if (normalizedKey === 'important') {
+      frontmatter.important = value === 'true';
+      return;
+    }
+
+    if (['title', 'date', 'month', 'category', 'location', 'summary'].includes(normalizedKey)) {
+      frontmatter[normalizedKey] = value as never;
+    }
+  });
+
+  return { frontmatter, body };
 }
 
 function normalizeContent(content: string) {
@@ -109,20 +162,71 @@ function normalizeContent(content: string) {
     .replace(/<aside>\s*/g, '> ')
     .replace(/\s*<\/aside>/g, '')
     .replace(/^💡\s*$/gm, '')
+    .replace(/^###\s*$/gm, '')
     .trim();
 }
 
-function extractFirstHeading(content: string) {
-  const heading = content
+function cleanHeading(heading: string) {
+  return heading
+    .replace(/^#{1,3}\s+/, '')
+    .replace(/^\d+(?:[-.)]|\.\s*)\s*/, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function extractHeadings(content: string) {
+  return content
     .split('\n')
     .map((line) => line.trim())
-    .find((line) => /^#{1,3}\s+/.test(line));
+    .filter((line) => /^#{1,3}\s+\S/.test(line))
+    .map(cleanHeading)
+    .filter(Boolean);
+}
 
-  return heading?.replace(/^#{1,3}\s+/, '').trim();
+function isDateLikeHeading(heading: string) {
+  return /^(\d{8}|\d{2}\/\d{2}|\d{4}-\d{2}-\d{2})$/.test(heading);
+}
+
+function buildTitle(date: string, content: string, frontmatter: Frontmatter) {
+  if (frontmatter.title) {
+    return frontmatter.title;
+  }
+
+  const headings = extractHeadings(content);
+  const usefulHeading = headings.find((heading) => !isDateLikeHeading(heading));
+
+  return usefulHeading ?? getCompactDateTitle(date);
+}
+
+function buildSummary(title: string, content: string, frontmatter: Frontmatter) {
+  if (frontmatter.summary) {
+    return frontmatter.summary;
+  }
+
+  const lines = content
+    .replace(/```[\s\S]*?```/g, '')
+    .split('\n')
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0)
+    .filter((line) => !/^#{1,6}\s+/.test(line))
+    .filter((line) => line !== '---')
+    .map((line) => line.replace(/^[-*>]\s*/, '').trim());
+
+  const firstUsefulLine = lines.find((line) => line.length > 18);
+
+  if (firstUsefulLine) {
+    return firstUsefulLine.length > 128 ? `${firstUsefulLine.slice(0, 125)}...` : firstUsefulLine;
+  }
+
+  return `${title} study note imported automatically from Markdown.`;
 }
 
 function inferCategory(content: string) {
   const normalizedContent = content.toLowerCase();
+
+  if (/dollarwatch|favoritecontroller|exchange|boardmapper|membermapper/.test(normalizedContent)) {
+    return 'Project Build';
+  }
 
   if (/tensorflow|placeholder|variable|python|keras|딥러닝/.test(normalizedContent)) {
     return 'Python / AI';
@@ -147,8 +251,11 @@ function inferCategory(content: string) {
   return 'Study Note';
 }
 
-function buildTags(category: string, month: string, content: string) {
+function buildTags(category: string, month: string, content: string, frontmatter: Frontmatter) {
   const tags = new Set<string>([category, month.replace(' 2026', '')]);
+
+  frontmatter.tags?.forEach((tag) => tags.add(tag));
+
   const keywordTags: Array<[RegExp, string]> = [
     [/java/i, 'Java'],
     [/spring/i, 'Spring'],
@@ -160,6 +267,8 @@ function buildTags(category: string, month: string, content: string) {
     [/api/i, 'API'],
     [/python/i, 'Python'],
     [/tensorflow/i, 'TensorFlow'],
+    [/dollarwatch/i, 'DollarWatch'],
+    [/mvc/i, 'MVC'],
   ];
 
   keywordTags.forEach(([pattern, tag]) => {
@@ -173,18 +282,20 @@ function buildTags(category: string, month: string, content: string) {
 
 function createRawNotesFromMarkdown(): RawNote[] {
   return Object.entries(noteContentModules)
-    .map(([path, content]): RawNote | null => {
-      const date = path.match(/(\d{4}-\d{2}-\d{2})\.md$/)?.[1];
+    .map(([path, rawContent]): RawNote | null => {
+      const pathDate = path.match(/(\d{4}-\d{2}-\d{2})\.md$/)?.[1];
 
-      if (!date) {
+      if (!pathDate) {
         return null;
       }
 
-      const normalizedContent = normalizeContent(content);
-      const month = getMonthFromDate(date);
-      const category = inferCategory(normalizedContent);
-      const heading = extractFirstHeading(normalizedContent);
-      const title = getCompactDateTitle(date);
+      const { frontmatter, body } = parseFrontmatter(rawContent);
+      const normalizedContent = normalizeContent(body);
+      const date = frontmatter.date ?? pathDate;
+      const month = frontmatter.month ?? getMonthFromDate(date);
+      const category = frontmatter.category ?? inferCategory(normalizedContent);
+      const title = buildTitle(date, normalizedContent, frontmatter);
+      const summary = buildSummary(title, normalizedContent, frontmatter);
 
       return {
         id: date,
@@ -192,12 +303,10 @@ function createRawNotesFromMarkdown(): RawNote[] {
         date,
         month,
         category,
-        summary: heading
-          ? `${title} — ${heading}`
-          : `${title} study note imported from Markdown.`,
-        tags: buildTags(category, month, normalizedContent),
+        summary,
+        tags: buildTags(category, month, normalizedContent, frontmatter),
         content: normalizedContent,
-        important: importantDates.has(date),
+        important: frontmatter.important ?? importantDates.has(date),
       } satisfies RawNote;
     })
     .filter((note): note is RawNote => note !== null)
@@ -236,7 +345,7 @@ function buildNote(note: RawNote, locale: Locale): Note {
         ? `${note.title} 학습 노트입니다. Markdown 파일에서 자동으로 불러왔습니다.`
         : `${note.title} study note imported automatically from Markdown.`),
     content: note.content ?? buildDefaultContent(note, locale),
-    tags: note.tags ?? [category, locale === 'ko' ? month.replace('2026년 ', '').replace('월', '월') : month.replace(' 2026', '')],
+    tags: note.tags ?? [category, locale === 'ko' ? month.replace('2026년 ', '') : month.replace(' 2026', '')],
   };
 }
 
