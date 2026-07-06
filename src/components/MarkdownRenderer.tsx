@@ -9,6 +9,38 @@ type ListItem = {
   ordered: boolean;
 };
 
+type TableBlock = {
+  headers: string[];
+  rows: string[][];
+};
+
+function slugify(text: string) {
+  return text
+    .toLowerCase()
+    .trim()
+    .replace(/[`*_~()[\]{}:;,.!?/\\]+/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '');
+}
+
+function stripHeadingMarker(text: string) {
+  return text.replace(/^#+\s+/, '').replace(/^\d+(?:[-.)]|\.\s*)\s*/, '').trim();
+}
+
+function splitTableRow(line: string) {
+  return line
+    .trim()
+    .replace(/^\|/, '')
+    .replace(/\|$/, '')
+    .split('|')
+    .map((cell) => cell.trim());
+}
+
+function isTableDivider(line: string) {
+  return /^\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)+\|?$/.test(line.trim());
+}
+
 function renderInline(text: string): ReactNode[] {
   const elements: ReactNode[] = [];
   let remaining = text;
@@ -36,7 +68,7 @@ function renderInline(text: string): ReactNode[] {
       );
     } else if (match[4]) {
       elements.push(
-        <code key={`code-${key}`} className="rounded-md bg-slate-100 px-1.5 py-0.5 text-blue-700">
+        <code key={`code-${key}`} className="rounded-md bg-slate-100 px-1.5 py-0.5 text-[0.92em] font-semibold text-blue-700 ring-1 ring-slate-200">
           {match[4]}
         </code>,
       );
@@ -64,9 +96,18 @@ function renderInline(text: string): ReactNode[] {
 export function MarkdownRenderer({ content }: MarkdownRendererProps) {
   const lines = content.trim().split('\n');
   const blocks: ReactNode[] = [];
+  const headingCounts = new Map<string, number>();
   let paragraphLines: string[] = [];
   let listItems: ListItem[] = [];
   let blockIndex = 0;
+
+  const buildHeadingId = (title: string) => {
+    const baseId = slugify(title) || `section-${blockIndex}`;
+    const seenCount = headingCounts.get(baseId) ?? 0;
+    headingCounts.set(baseId, seenCount + 1);
+
+    return seenCount === 0 ? baseId : `${baseId}-${seenCount + 1}`;
+  };
 
   const flushParagraph = () => {
     if (paragraphLines.length === 0) {
@@ -95,12 +136,44 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
         key={`list-${blockIndex}`}
         className={`space-y-2 pl-5 leading-8 text-slate-700 ${isOrdered ? 'list-decimal' : 'list-disc'}`}
       >
-        {listItems.map((item) => (
-          <li key={`${blockIndex}-${item.text}`}>{renderInline(item.text)}</li>
+        {listItems.map((item, itemIndex) => (
+          <li key={`${blockIndex}-${itemIndex}-${item.text}`}>{renderInline(item.text)}</li>
         ))}
       </ListTag>,
     );
     listItems = [];
+    blockIndex += 1;
+  };
+
+  const renderTable = (table: TableBlock) => {
+    blocks.push(
+      <div key={`table-${blockIndex}`} className="overflow-hidden rounded-2xl border border-slate-200 shadow-sm">
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[34rem] border-collapse text-left text-sm">
+            <thead className="bg-slate-50 text-xs font-black uppercase tracking-[0.14em] text-slate-500">
+              <tr>
+                {table.headers.map((header, headerIndex) => (
+                  <th key={`${header}-${headerIndex}`} className="border-b border-slate-200 px-4 py-3">
+                    {renderInline(header)}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100 text-slate-700">
+              {table.rows.map((row, rowIndex) => (
+                <tr key={`row-${rowIndex}`} className="odd:bg-white even:bg-slate-50/60">
+                  {row.map((cell, cellIndex) => (
+                    <td key={`${rowIndex}-${cellIndex}`} className="px-4 py-3 align-top leading-7">
+                      {renderInline(cell)}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>,
+    );
     blockIndex += 1;
   };
 
@@ -111,6 +184,14 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
     if (trimmed.length === 0) {
       flushParagraph();
       flushList();
+      continue;
+    }
+
+    if (trimmed === '---' || trimmed === '***') {
+      flushParagraph();
+      flushList();
+      blocks.push(<hr key={`divider-${blockIndex}`} className="border-slate-200" />);
+      blockIndex += 1;
       continue;
     }
 
@@ -129,11 +210,12 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
 
       blocks.push(
         <div key={`code-${blockIndex}`} className="overflow-hidden rounded-2xl border border-slate-200 bg-slate-950 shadow-sm">
-          {language && (
-            <div className="border-b border-white/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] text-slate-400">
-              {language}
-            </div>
-          )}
+          <div className="flex items-center justify-between border-b border-white/10 px-4 py-2">
+            <span className="text-xs font-bold uppercase tracking-[0.2em] text-slate-400">
+              {language || 'code'}
+            </span>
+            <span className="text-[0.65rem] font-black uppercase tracking-[0.22em] text-slate-500">snippet</span>
+          </div>
           <pre className="overflow-x-auto p-4 text-sm leading-7 text-slate-100">
             <code>{codeLines.join('\n')}</code>
           </pre>
@@ -143,12 +225,36 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
       continue;
     }
 
+    if (trimmed.includes('|') && lineIndex + 1 < lines.length && isTableDivider(lines[lineIndex + 1])) {
+      flushParagraph();
+      flushList();
+
+      const headers = splitTableRow(trimmed);
+      const rows: string[][] = [];
+      lineIndex += 2;
+
+      while (lineIndex < lines.length && lines[lineIndex].trim().includes('|')) {
+        rows.push(splitTableRow(lines[lineIndex]));
+        lineIndex += 1;
+      }
+
+      lineIndex -= 1;
+      renderTable({ headers, rows });
+      continue;
+    }
+
     if (trimmed.startsWith('### ')) {
       flushParagraph();
       flushList();
+      const headingText = stripHeadingMarker(trimmed);
+
+      if (headingText.length === 0) {
+        continue;
+      }
+
       blocks.push(
-        <h4 key={`h3-${blockIndex}`} className="pt-2 text-lg font-extrabold text-slate-950">
-          {renderInline(trimmed.slice(4))}
+        <h4 id={buildHeadingId(headingText)} key={`h3-${blockIndex}`} className="scroll-mt-28 pt-2 text-lg font-extrabold text-slate-950">
+          {renderInline(headingText)}
         </h4>,
       );
       blockIndex += 1;
@@ -158,9 +264,15 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
     if (trimmed.startsWith('## ')) {
       flushParagraph();
       flushList();
+      const headingText = stripHeadingMarker(trimmed);
+
+      if (headingText.length === 0) {
+        continue;
+      }
+
       blocks.push(
-        <h3 key={`h2-${blockIndex}`} className="pt-3 text-2xl font-extrabold text-slate-950">
-          {renderInline(trimmed.slice(3))}
+        <h3 id={buildHeadingId(headingText)} key={`h2-${blockIndex}`} className="scroll-mt-28 pt-4 text-2xl font-extrabold tracking-tight text-slate-950">
+          {renderInline(headingText)}
         </h3>,
       );
       blockIndex += 1;
@@ -170,9 +282,15 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
     if (trimmed.startsWith('# ')) {
       flushParagraph();
       flushList();
+      const headingText = stripHeadingMarker(trimmed);
+
+      if (headingText.length === 0) {
+        continue;
+      }
+
       blocks.push(
         <h2 key={`h1-${blockIndex}`} className="text-3xl font-black tracking-tight text-slate-950">
-          {renderInline(trimmed.slice(2))}
+          {renderInline(headingText)}
         </h2>,
       );
       blockIndex += 1;
@@ -185,8 +303,9 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
       blocks.push(
         <blockquote
           key={`quote-${blockIndex}`}
-          className="rounded-r-2xl border-l-4 border-blue-500 bg-blue-50 px-4 py-3 text-blue-900"
+          className="rounded-2xl border border-blue-100 bg-blue-50 px-4 py-3 text-sm font-semibold leading-7 text-blue-950 shadow-sm"
         >
+          <span className="mr-2" aria-hidden="true">💡</span>
           {renderInline(trimmed.slice(2))}
         </blockquote>,
       );
@@ -216,5 +335,5 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
   flushParagraph();
   flushList();
 
-  return <div className="space-y-5">{blocks}</div>;
+  return <div className="space-y-5 text-[0.98rem]">{blocks}</div>;
 }
