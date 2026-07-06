@@ -1,29 +1,4 @@
 import type { Locale } from '../lib/locale';
-// 2026년 03월
-import note20260304Content from './noteContents/2026-03-04.md?raw';
-import note20260305Content from './noteContents/2026-03-05.md?raw';
-import note20260306Content from './noteContents/2026-03-06.md?raw';
-
-import note20260309Content from './noteContents/2026-03-09.md?raw';
-import note20260310Content from './noteContents/2026-03-10.md?raw';
-import note20260311Content from './noteContents/2026-03-11.md?raw';
-import note20260312Content from './noteContents/2026-03-12.md?raw';
-import note20260313Content from './noteContents/2026-03-13.md?raw';
-
-import note20260317Content from './noteContents/2026-03-17.md?raw';
-import note20260318Content from './noteContents/2026-03-18.md?raw';
-import note20260319Content from './noteContents/2026-03-19.md?raw';
-import note20260320Content from './noteContents/2026-03-20.md?raw';
-
-import note20260323Content from './noteContents/2026-03-23.md?raw';
-import note20260324Content from './noteContents/2026-03-24.md?raw';
-import note20260325Content from './noteContents/2026-03-25.md?raw';
-import note20260326Content from './noteContents/2026-03-26.md?raw';
-import note20260327Content from './noteContents/2026-03-27.md?raw';
-
-import note20260330Content from './noteContents/2026-03-30.md?raw';
-import note20260331Content from './noteContents/2026-03-31.md?raw';
-
 
 export type Note = {
   id: string;
@@ -44,50 +19,69 @@ type RawNote = Omit<Note, 'summary' | 'content' | 'tags'> & {
   content?: string;
 };
 
-type StudyNoteInput = {
-  date: string;
-  month: string;
-  category?: string;
-  location?: string;
-  summary?: string;
-  tags?: string[];
-  content?: string;
-  important?: boolean;
-  suffix?: string;
-};
+const noteContentModules = import.meta.glob<string>('./noteContents/*.md', {
+  eager: true,
+  query: '?raw',
+  import: 'default',
+});
+
+const importantDates = new Set([
+  '2026-03-04',
+  '2026-03-11',
+  '2026-03-13',
+  '2026-03-18',
+  '2026-03-23',
+  '2026-03-25',
+  '2026-03-26',
+  '2026-03-27',
+  '2026-04-17',
+  '2026-04-29',
+  '2026-05-15',
+  '2026-06-02',
+  '2026-07-01',
+]);
 
 const monthKoMap: Record<string, string> = {
+  'January 2026': '2026년 1월',
+  'February 2026': '2026년 2월',
   'March 2026': '2026년 3월',
   'April 2026': '2026년 4월',
   'May 2026': '2026년 5월',
   'June 2026': '2026년 6월',
+  'July 2026': '2026년 7월',
+  'August 2026': '2026년 8월',
+  'September 2026': '2026년 9월',
+  'October 2026': '2026년 10월',
+  'November 2026': '2026년 11월',
+  'December 2026': '2026년 12월',
 };
+
+const monthEnNames = [
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
+];
 
 function getCompactDateTitle(date: string) {
   const [year, month, day] = date.split('-');
   return `${month}${day}${year}`;
 }
 
-function createStudyNote({
-  date,
-  month,
-  category = 'Study Note',
-  suffix,
-  ...note
-}: StudyNoteInput): RawNote {
-  const title = suffix ? `${getCompactDateTitle(date)}_${suffix}` : getCompactDateTitle(date);
+function getMonthFromDate(date: string) {
+  const [year, month] = date.split('-');
+  const monthIndex = Number(month) - 1;
 
-  return {
-    id: suffix ? `${date}-${suffix}` : date,
-    title,
-    date,
-    month,
-    category,
-    ...note,
-  };
+  return `${monthEnNames[monthIndex] ?? 'Unsorted'} ${year}`;
 }
-
-
 
 function getLocalizedMonth(month: string, locale: Locale) {
   return locale === 'ko' ? monthKoMap[month] ?? month : month;
@@ -98,119 +92,139 @@ function getLocalizedCategory(category: string, locale: Locale) {
     return category;
   }
 
-  if (category === 'Study Note') {
-    return '학습 노트';
+  const koCategoryMap: Record<string, string> = {
+    'Java / Basic': 'Java / 기초',
+    'Java / Spring': 'Java / Spring',
+    'Database / SQL': 'Database / SQL',
+    'Web / API': 'Web / API',
+    'Python / AI': 'Python / AI',
+    'Study Note': '학습 노트',
+  };
+
+  return koCategoryMap[category] ?? category;
+}
+
+function normalizeContent(content: string) {
+  return content
+    .replace(/<aside>\s*/g, '> ')
+    .replace(/\s*<\/aside>/g, '')
+    .replace(/^💡\s*$/gm, '')
+    .trim();
+}
+
+function extractFirstHeading(content: string) {
+  const heading = content
+    .split('\n')
+    .map((line) => line.trim())
+    .find((line) => /^#{1,3}\s+/.test(line));
+
+  return heading?.replace(/^#{1,3}\s+/, '').trim();
+}
+
+function inferCategory(content: string) {
+  const normalizedContent = content.toLowerCase();
+
+  if (/tensorflow|placeholder|variable|python|keras|딥러닝/.test(normalizedContent)) {
+    return 'Python / AI';
   }
 
-  return category;
+  if (/spring|mybatis|ajax|controller|mapper|servlet|egov/.test(normalizedContent)) {
+    return 'Java / Spring';
+  }
+
+  if (/oracle|sql|select|insert|update|delete|database|db\b/.test(normalizedContent)) {
+    return 'Database / SQL';
+  }
+
+  if (/open api|xml|json|url|http|request|response|api/.test(normalizedContent)) {
+    return 'Web / API';
+  }
+
+  if (/java|jdk|jvm|eclipse|class|public static void main/.test(normalizedContent)) {
+    return 'Java / Basic';
+  }
+
+  return 'Study Note';
+}
+
+function buildTags(category: string, month: string, content: string) {
+  const tags = new Set<string>([category, month.replace(' 2026', '')]);
+  const keywordTags: Array<[RegExp, string]> = [
+    [/java/i, 'Java'],
+    [/spring/i, 'Spring'],
+    [/mybatis/i, 'MyBatis'],
+    [/ajax/i, 'AJAX'],
+    [/oracle|sql/i, 'SQL'],
+    [/xml/i, 'XML'],
+    [/json/i, 'JSON'],
+    [/api/i, 'API'],
+    [/python/i, 'Python'],
+    [/tensorflow/i, 'TensorFlow'],
+  ];
+
+  keywordTags.forEach(([pattern, tag]) => {
+    if (pattern.test(content)) {
+      tags.add(tag);
+    }
+  });
+
+  return [...tags];
+}
+
+function createRawNotesFromMarkdown(): RawNote[] {
+  return Object.entries(noteContentModules)
+    .map(([path, content]): RawNote | null => {
+      const date = path.match(/(\d{4}-\d{2}-\d{2})\.md$/)?.[1];
+
+      if (!date) {
+        return null;
+      }
+
+      const normalizedContent = normalizeContent(content);
+      const month = getMonthFromDate(date);
+      const category = inferCategory(normalizedContent);
+      const heading = extractFirstHeading(normalizedContent);
+      const title = getCompactDateTitle(date);
+
+      return {
+        id: date,
+        title,
+        date,
+        month,
+        category,
+        summary: heading
+          ? `${title} — ${heading}`
+          : `${title} study note imported from Markdown.`,
+        tags: buildTags(category, month, normalizedContent),
+        content: normalizedContent,
+        important: importantDates.has(date),
+      } satisfies RawNote;
+    })
+    .filter((note): note is RawNote => note !== null)
+    .sort((a, b) => a.date.localeCompare(b.date));
 }
 
 function buildDefaultContent(note: RawNote, locale: Locale) {
   if (locale === 'ko') {
     return `# ${note.title}
 
-## 학습 체크리스트
-
-- 이 날짜에 학습한 핵심 개념을 다시 확인합니다.
-- 기존 Notion 필기 내용을 이 Markdown 필드로 옮깁니다.
-- 필요한 경우 소스 코드, 명령어, 스크린샷, 오류 해결 기록을 추가합니다.
-
 ## 핵심 정리
 
-> 이 페이지는 Markdown 필기 이전을 위해 준비된 템플릿입니다. 기존 수업 필기 내용으로 교체하면 됩니다.
-
-### Markdown 예시
-
-- 중요한 개념은 **굵게 표시**합니다.
-- 짧은 명령어나 식별자는 \`inline code\`로 표시합니다.
-- Java, SQL, JavaScript, shell 명령어는 코드블럭으로 정리합니다.
-
-\`\`\`java
-// 기존 코드 예제를 여기에 붙여넣으세요.
-public class Example {
-  public static void main(String[] args) {
-    System.out.println("${note.title}");
-  }
-}
-\`\`\`
+> 아직 연결된 Markdown 본문이 없습니다. \`src/data/noteContents/${note.date}.md\` 파일을 추가하면 자동으로 노트 탭에 표시됩니다.
 `;
   }
 
   return `# ${note.title}
 
-## Study Checklist
-
-- Review the main concept from this date.
-- Move the original Notion note into this Markdown field.
-- Add source code, command snippets, screenshots, and troubleshooting notes if needed.
-
 ## Key Takeaways
 
-> This page is ready for Markdown migration. Replace this template with the original class note.
-
-### Markdown examples
-
-- **Bold text** for important ideas
-- \`inline code\` for short commands or identifiers
-- Code fences for Java, SQL, JavaScript, or shell commands
-
-\`\`\`java
-// Paste the original code example here.
-public class Example {
-  public static void main(String[] args) {
-    System.out.println("${note.title}");
-  }
-}
-\`\`\`
+> No Markdown body is connected yet. Add \`src/data/noteContents/${note.date}.md\` and it will show up automatically in the Notes tab.
 `;
-}
-
-function localizeProvidedContent(note: RawNote, locale: Locale) {
-  if (locale === 'ko' && note.id === '2026-05-28') {
-    return `# 05282026
-
-## 예제
-
-### HomeController.java
-
-C:\\Users\\sedu01\\Desktop\\Test\\20260518_eGov\\May28_1_AJAXServer\\src\\main\\java\\com\\beaver\\may281\\HomeController.java
-
-\`\`\`java
-package com.beaver.may281;
-
-import java.text.DateFormat;
-import java.util.Date;
-import java.util.Locale;
-
-import javax.servlet.http.HttpServletRequest;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-
-@Controller
-public class HomeController {
-  private static final Logger logger = LoggerFactory.getLogger(HomeController.class);
-
-  // 원본 Notion 코드블럭 전체를 여기에 옮기면 됩니다.
-}
-\`\`\`
-
-## 이전 메모
-
-- 이 페이지는 기존 Notion 날짜별 필기와 연결되어 있습니다.
-- Markdown export 파일이 준비되면 placeholder 코드를 실제 수업 코드로 교체하세요.
-`;
-  }
-
-  return note.content;
 }
 
 function buildNote(note: RawNote, locale: Locale): Note {
   const month = getLocalizedMonth(note.month, locale);
   const category = getLocalizedCategory(note.category, locale);
-  const providedContent = localizeProvidedContent(note, locale);
 
   return {
     ...note,
@@ -219,585 +233,14 @@ function buildNote(note: RawNote, locale: Locale): Note {
     summary:
       note.summary ??
       (locale === 'ko'
-        ? `${note.title} 학습 노트입니다. 기존 Notion 필기 내용을 Markdown으로 옮겨 정리할 수 있습니다.`
-        : `${note.title} study note. Markdown content can be migrated from the original Notion page.`),
-    content: providedContent ?? buildDefaultContent(note, locale),
+        ? `${note.title} 학습 노트입니다. Markdown 파일에서 자동으로 불러왔습니다.`
+        : `${note.title} study note imported automatically from Markdown.`),
+    content: note.content ?? buildDefaultContent(note, locale),
     tags: note.tags ?? [category, locale === 'ko' ? month.replace('2026년 ', '').replace('월', '월') : month.replace(' 2026', '')],
   };
 }
 
-// -----------------------------------------------------------------------------
-// March 2026
-// -----------------------------------------------------------------------------
-
-// 2026-03-04 / 03042026
-const note20260304 = createStudyNote({
-  date: '2026-03-04',
-  month: 'March 2026',
-  category: 'Java / Basic',
-  location: 'Java basics / JDK / Eclipse / Console output',
-  summary: 'Java fundamentals note covering JDK, JVM, Eclipse setup, comments, output methods, escape sequences, and printf formatting.',
-  tags: ['Java', 'JDK', 'JVM', 'Eclipse', 'Console', 'printf'],
-  important: true,
-  content: note20260304Content,
-});
-
-// 2026-03-05 / 03052026
-const note20260305 = createStudyNote({
-  date: '2026-03-05',
-  month: 'March 2026',
-  category: 'Java / Basic',
-  location: '',
-  summary: '',
-  tags: ['Java', 'JDK', 'JVM', 'Eclipse', 'Console', 'printf'],
-  content: note20260305Content,
-});
-
-// 2026-03-06 / 03062026
-const note20260306 = createStudyNote({
-  date: '2026-03-06',
-  month: 'March 2026',
-  category: 'Java / Basic',
-  location: '',
-  summary: '',
-  tags: ['Java', 'JDK', 'JVM', 'Eclipse', 'Console', 'printf'],
-  content: note20260306Content,
-});
-
-// 2026-03-09 / 03092026
-const note20260309 = createStudyNote({
-  date: '2026-03-09',
-  month: 'March 2026',
-  category: 'Java / Basic',
-  location: '',
-  summary: '',
-  tags: ['Java', 'JDK', 'JVM', 'Eclipse', 'Console', 'printf'],
-  content: note20260309Content,
-});
-
-// 2026-03-10 / 03102026
-const note20260310 = createStudyNote({
-  date: '2026-03-10',
-  month: 'March 2026',
-  category: 'Java / Basic',
-  location: '',
-  summary: '',
-  tags: ['Java', 'JDK', 'JVM', 'Eclipse', 'Console', 'printf'],
-  content: note20260310Content,
-});
-
-// 2026-03-11 / 03112026
-const note20260311 = createStudyNote({
-  date: '2026-03-11',
-  month: 'March 2026',
-  category: 'Java / Basic',
-  location: '',
-  summary: '',
-  tags: ['Java', 'JDK', 'JVM', 'Eclipse', 'Console', 'printf'],
-  content: note20260311Content,
-  important: true,
-});
-
-// 2026-03-12 / 03122026
-const note20260312 = createStudyNote({
-  date: '2026-03-12',
-  month: 'March 2026',
-  category: 'Java / Basic',
-  location: '',
-  summary: '',
-  tags: ['Java', 'JDK', 'JVM', 'Eclipse', 'Console', 'printf'],
-  content: note20260312Content,
-});
-
-// 2026-03-13 / 03132026
-const note20260313 = createStudyNote({
-  date: '2026-03-13',
-  month: 'March 2026',
-  category: 'Java / Basic',
-  location: '',
-  summary: '',
-  tags: ['Java', 'JDK', 'JVM', 'Eclipse', 'Console', 'printf'],
-  content: note20260313Content,
-  important: true,
-});
-
-// 2026-03-17 / 03172026
-const note20260317 = createStudyNote({
-  date: '2026-03-17',
-  month: 'March 2026',
-  category: 'Java / Basic',
-  location: '',
-  summary: '',
-  tags: ['Java', 'JDK', 'JVM', 'Eclipse', 'Console', 'printf'],
-  content: note20260317Content,
-});
-
-// 2026-03-18 / 03182026
-const note20260318 = createStudyNote({
-  date: '2026-03-18',
-  month: 'March 2026',
-  important: true,
-  category: 'Java / Basic',
-  location: '',
-  summary: '',
-  tags: ['Java', 'JDK', 'JVM', 'Eclipse', 'Console', 'printf'],
-  content: note20260318Content,
-});
-
-// 2026-03-19 / 03192026
-const note20260319 = createStudyNote({
-  date: '2026-03-19',
-  month: 'March 2026',
-  category: 'Java / Basic',
-  location: '',
-  summary: '',
-  tags: ['Java', 'JDK', 'JVM', 'Eclipse', 'Console', 'printf'],
-  content: note20260319Content,
-});
-
-// 2026-03-20 / 03202026
-const note20260320 = createStudyNote({
-  date: '2026-03-20',
-  month: 'March 2026',
-  category: 'Java / Basic',
-  location: '',
-  summary: '',
-  tags: ['Java', 'JDK', 'JVM', 'Eclipse', 'Console', 'printf'],
-  content: note20260320Content,
-});
-
-// 2026-03-23 / 03232026
-const note20260323 = createStudyNote({
-  date: '2026-03-23',
-  month: 'March 2026',
-  important: true,
-  category: 'Java / Basic',
-  location: '',
-  summary: '',
-  tags: ['Java', 'JDK', 'JVM', 'Eclipse', 'Console', 'printf'],
-  content: note20260323Content,
-});
-
-// 2026-03-24 / 03242026
-const note20260324 = createStudyNote({
-  date: '2026-03-24',
-  month: 'March 2026',
-  category: 'Java / Basic',
-  location: '',
-  summary: '',
-  tags: ['Java', 'JDK', 'JVM', 'Eclipse', 'Console', 'printf'],
-  content: note20260324Content,
-});
-
-// 2026-03-25 / 03252026
-const note20260325 = createStudyNote({
-  date: '2026-03-25',
-  month: 'March 2026',
-  important: true,
-  category: 'Java / Basic',
-  location: '',
-  summary: '',
-  tags: ['Java', 'JDK', 'JVM', 'Eclipse', 'Console', 'printf'],
-  content: note20260325Content,
-});
-
-// 2026-03-26 / 03262026
-const note20260326 = createStudyNote({
-  date: '2026-03-26',
-  month: 'March 2026',
-  important: true,
-  category: 'Java / Basic',
-  location: '',
-  summary: '',
-  tags: ['Java', 'JDK', 'JVM', 'Eclipse', 'Console', 'printf'],
-  content: note20260326Content,
-});
-
-// 2026-03-27 / 03272026
-const note20260327 = createStudyNote({
-  date: '2026-03-27',
-  month: 'March 2026',
-  important: true,
-  category: 'Java / Basic',
-  location: '',
-  summary: '',
-  tags: ['Java', 'JDK', 'JVM', 'Eclipse', 'Console', 'printf'],
-  content: note20260327Content,
-});
-
-// 2026-03-30 / 03302026
-const note20260330 = createStudyNote({
-  date: '2026-03-30',
-  month: 'March 2026',
-  category: 'Java / Basic',
-  location: '',
-  summary: '',
-  tags: ['Java', 'JDK', 'JVM', 'Eclipse', 'Console', 'printf'],
-  content: note20260330Content,
-});
-
-// 2026-03-31 / 03312026
-const note20260331 = createStudyNote({
-  date: '2026-03-31',
-  month: 'March 2026',
-  category: 'Java / Basic',
-  location: '',
-  summary: '',
-  tags: ['Java', 'JDK', 'JVM', 'Eclipse', 'Console', 'printf'],
-  content: note20260331Content,
-});
-
-// -----------------------------------------------------------------------------
-// April 2026
-// -----------------------------------------------------------------------------
-
-// 2026-04-01 / 04012026
-const note20260401 = createStudyNote({
-  date: '2026-04-01',
-  month: 'April 2026',
-});
-
-// 2026-04-02 / 04022026
-const note20260402 = createStudyNote({
-  date: '2026-04-02',
-  month: 'April 2026',
-});
-
-// 2026-04-03 / 04032026
-const note20260403 = createStudyNote({
-  date: '2026-04-03',
-  month: 'April 2026',
-});
-
-// 2026-04-06 / 04062026
-const note20260406 = createStudyNote({
-  date: '2026-04-06',
-  month: 'April 2026',
-});
-
-// 2026-04-07 / 04072026
-const note20260407 = createStudyNote({
-  date: '2026-04-07',
-  month: 'April 2026',
-});
-
-// 2026-04-08 / 04082026
-const note20260408 = createStudyNote({
-  date: '2026-04-08',
-  month: 'April 2026',
-});
-
-// 2026-04-09 / 04092026
-const note20260409 = createStudyNote({
-  date: '2026-04-09',
-  month: 'April 2026',
-});
-
-// 2026-04-10 / 04102026
-const note20260410 = createStudyNote({
-  date: '2026-04-10',
-  month: 'April 2026',
-});
-
-// 2026-04-14 / 04142026
-const note20260414 = createStudyNote({
-  date: '2026-04-14',
-  month: 'April 2026',
-});
-
-// 2026-04-15 / 04152026
-const note20260415 = createStudyNote({
-  date: '2026-04-15',
-  month: 'April 2026',
-});
-
-// 2026-04-16 / 04162026
-const note20260416 = createStudyNote({
-  date: '2026-04-16',
-  month: 'April 2026',
-});
-
-// 2026-04-17 / 04172026
-const note20260417 = createStudyNote({
-  date: '2026-04-17',
-  month: 'April 2026',
-  important: true,
-});
-
-// 2026-04-17 / 04172026_02
-const note20260417Part02 = createStudyNote({
-  date: '2026-04-17',
-  month: 'April 2026',
-  suffix: '02',
-  important: true,
-});
-
-// 2026-04-20 / 04202026
-const note20260420 = createStudyNote({
-  date: '2026-04-20',
-  month: 'April 2026',
-});
-
-// 2026-04-21 / 04212026
-const note20260421 = createStudyNote({
-  date: '2026-04-21',
-  month: 'April 2026',
-});
-
-// 2026-04-22 / 04222026
-const note20260422 = createStudyNote({
-  date: '2026-04-22',
-  month: 'April 2026',
-});
-
-// 2026-04-23 / 04232026
-const note20260423 = createStudyNote({
-  date: '2026-04-23',
-  month: 'April 2026',
-});
-
-// 2026-04-24 / 04242026
-const note20260424 = createStudyNote({
-  date: '2026-04-24',
-  month: 'April 2026',
-});
-
-// 2026-04-28 / 04282026
-const note20260428 = createStudyNote({
-  date: '2026-04-28',
-  month: 'April 2026',
-});
-
-// 2026-04-29 / 04292026
-const note20260429 = createStudyNote({
-  date: '2026-04-29',
-  month: 'April 2026',
-  important: true,
-});
-
-// 2026-04-30 / 04302026
-const note20260430 = createStudyNote({
-  date: '2026-04-30',
-  month: 'April 2026',
-});
-
-// -----------------------------------------------------------------------------
-// May 2026
-// -----------------------------------------------------------------------------
-
-// 2026-05-06 / 05062026
-const note20260506 = createStudyNote({
-  date: '2026-05-06',
-  month: 'May 2026',
-});
-
-// 2026-05-07 / 05072026
-const note20260507 = createStudyNote({
-  date: '2026-05-07',
-  month: 'May 2026',
-});
-
-// 2026-05-08 / 05082026
-const note20260508 = createStudyNote({
-  date: '2026-05-08',
-  month: 'May 2026',
-});
-
-// 2026-05-11 / 05112026
-const note20260511 = createStudyNote({
-  date: '2026-05-11',
-  month: 'May 2026',
-});
-
-// 2026-05-12 / 05122026
-const note20260512 = createStudyNote({
-  date: '2026-05-12',
-  month: 'May 2026',
-});
-
-// 2026-05-13 / 05132026
-const note20260513 = createStudyNote({
-  date: '2026-05-13',
-  month: 'May 2026',
-});
-
-// 2026-05-14 / 05142026
-const note20260514 = createStudyNote({
-  date: '2026-05-14',
-  month: 'May 2026',
-});
-
-// 2026-05-15 / 05152026
-const note20260515 = createStudyNote({
-  date: '2026-05-15',
-  month: 'May 2026',
-  important: true,
-});
-
-// 2026-05-18 / 05182026
-const note20260518 = createStudyNote({
-  date: '2026-05-18',
-  month: 'May 2026',
-});
-
-// 2026-05-19 / 05192026
-const note20260519 = createStudyNote({
-  date: '2026-05-19',
-  month: 'May 2026',
-});
-
-// 2026-05-20 / 05202026
-const note20260520 = createStudyNote({
-  date: '2026-05-20',
-  month: 'May 2026',
-});
-
-// 2026-05-21 / 05212026
-const note20260521 = createStudyNote({
-  date: '2026-05-21',
-  month: 'May 2026',
-});
-
-// 2026-05-22 / 05222026
-const note20260522 = createStudyNote({
-  date: '2026-05-22',
-  month: 'May 2026',
-});
-
-// 2026-05-26 / 05262026
-const note20260526 = createStudyNote({
-  date: '2026-05-26',
-  month: 'May 2026',
-});
-
-// 2026-05-27 / 05272026
-const note20260527 = createStudyNote({
-  date: '2026-05-27',
-  month: 'May 2026',
-});
-
-// 2026-05-28 / 05282026
-const note20260528 = createStudyNote({
-  date: '2026-05-28',
-  month: 'May 2026',
-  category: 'Java / Spring',
-  location: 'AJAX Server / HomeController.java',
-  summary: 'Spring controller note prepared for Java and AJAX server study content.',
-  tags: ['Java', 'Spring MVC', 'Controller', 'AJAX'],
-  content: `# 05282026
-
-## Example
-
-### HomeController.java
-
-C:\\Users\\sedu01\\Desktop\\Test\\20260518_eGov\\May28_1_AJAXServer\\src\\main\\java\\com\\beaver\\may281\\HomeController.java
-
-\`\`\`java
-package com.beaver.may281;
-
-import java.text.DateFormat;
-import java.util.Date;
-import java.util.Locale;
-
-import javax.servlet.http.HttpServletRequest;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-
-@Controller
-public class HomeController {
-  private static final Logger logger = LoggerFactory.getLogger(HomeController.class);
-
-  // Move the full Notion code block here.
-}
-\`\`\`
-
-## Migration note
-
-- This page is connected to the original Notion-style date entry.
-- Replace the placeholder code with the full class note when the Markdown export is available.
-`,
-});
-
-// 2026-05-29 / 05292026
-const note20260529 = createStudyNote({
-  date: '2026-05-29',
-  month: 'May 2026',
-});
-
-const march2026Notes: RawNote[] = [
-  note20260304,
-  note20260305,
-  note20260306,
-  note20260309,
-  note20260310,
-  note20260311,
-  note20260312,
-  note20260313,
-  note20260317,
-  note20260318,
-  note20260319,
-  note20260320,
-  note20260323,
-  note20260324,
-  note20260325,
-  note20260326,
-  note20260327,
-  note20260330,
-  note20260331,
-];
-
-const april2026Notes: RawNote[] = [
-  note20260401,
-  note20260402,
-  note20260403,
-  note20260406,
-  note20260407,
-  note20260408,
-  note20260409,
-  note20260410,
-  note20260414,
-  note20260415,
-  note20260416,
-  note20260417,
-  note20260417Part02,
-  note20260420,
-  note20260421,
-  note20260422,
-  note20260423,
-  note20260424,
-  note20260428,
-  note20260429,
-  note20260430,
-];
-
-const may2026Notes: RawNote[] = [
-  note20260506,
-  note20260507,
-  note20260508,
-  note20260511,
-  note20260512,
-  note20260513,
-  note20260514,
-  note20260515,
-  note20260518,
-  note20260519,
-  note20260520,
-  note20260521,
-  note20260522,
-  note20260526,
-  note20260527,
-  note20260528,
-  note20260529,
-];
-
-const rawNotes: RawNote[] = [
-  ...march2026Notes,
-  ...april2026Notes,
-  ...may2026Notes,
-];
+const rawNotes: RawNote[] = createRawNotesFromMarkdown();
 
 export const notesByLocale: Record<Locale, Note[]> = {
   en: rawNotes.map((note) => buildNote(note, 'en')),
