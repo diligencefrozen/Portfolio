@@ -115,7 +115,7 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
     }
 
     blocks.push(
-      <p key={`paragraph-${blockIndex}`} className="leading-8 text-slate-700">
+      <p key={`paragraph-${blockIndex}`} className="break-words leading-8 text-slate-700">
         {renderInline(paragraphLines.join(' '))}
       </p>,
     );
@@ -216,7 +216,7 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
             </span>
             <span className="text-[0.65rem] font-black uppercase tracking-[0.22em] text-slate-500">snippet</span>
           </div>
-          <pre className="overflow-x-auto p-4 text-sm leading-7 text-slate-100">
+          <pre className="max-w-full overflow-x-auto p-4 text-sm leading-7 text-slate-100">
             <code>{codeLines.join('\n')}</code>
           </pre>
         </div>,
@@ -253,7 +253,7 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
       }
 
       blocks.push(
-        <h4 id={buildHeadingId(headingText)} key={`h3-${blockIndex}`} className="scroll-mt-28 pt-2 text-lg font-extrabold text-slate-950">
+        <h4 id={buildHeadingId(headingText)} key={`h3-${blockIndex}`} className="scroll-mt-28 break-words pt-2 text-lg font-extrabold text-slate-950">
           {renderInline(headingText)}
         </h4>,
       );
@@ -271,7 +271,7 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
       }
 
       blocks.push(
-        <h3 id={buildHeadingId(headingText)} key={`h2-${blockIndex}`} className="scroll-mt-28 pt-4 text-2xl font-extrabold tracking-tight text-slate-950">
+        <h3 id={buildHeadingId(headingText)} key={`h2-${blockIndex}`} className="scroll-mt-28 break-words pt-4 text-2xl font-extrabold tracking-tight text-slate-950">
           {renderInline(headingText)}
         </h3>,
       );
@@ -289,7 +289,7 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
       }
 
       blocks.push(
-        <h2 key={`h1-${blockIndex}`} className="text-3xl font-black tracking-tight text-slate-950">
+        <h2 key={`h1-${blockIndex}`} className="break-words text-3xl font-black tracking-tight text-slate-950">
           {renderInline(headingText)}
         </h2>,
       );
@@ -335,5 +335,5 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
   flushParagraph();
   flushList();
 
-  return <div className="space-y-5 text-[0.98rem]">{blocks}</div>;
+  return <div className="min-w-0 space-y-5 break-words text-[0.98rem]">{blocks}</div>;
 }
