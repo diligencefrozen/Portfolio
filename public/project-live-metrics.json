@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "fetchedAt": "2026-08-22T06:40:17.735Z",
+  "fetchedAt": "2026-08-22T12:39:33.730Z",
   "projects": {
     "dcinside-gallery-blocker": {
       "chromeWebStore": {
@@ -122,10 +122,10 @@
         "status": "ok",
         "repo": "diligencefrozen/DCinside-Gallery-Blocker",
         "sourceUrl": "https://github.com/diligencefrozen/DCinside-Gallery-Blocker",
-        "commitCount": 611,
-        "latestCommitAt": "2026-08-08T14:30:59Z",
-        "latestCommitMessage": "Add files via upload",
-        "latestCommitUrl": "https://github.com/diligencefrozen/DCinside-Gallery-Blocker/commit/69175e54bcd6912ac8cd68580fbdec0028669c7e"
+        "commitCount": 619,
+        "latestCommitAt": "2026-08-22T07:01:11Z",
+        "latestCommitMessage": "fix: 키워드 보기의 비회원 차단 우회 방지",
+        "latestCommitUrl": "https://github.com/diligencefrozen/DCinside-Gallery-Blocker/commit/b715873b05498b7f3bdd03c601499ff0cf09bcc6"
       }
     }
   }
