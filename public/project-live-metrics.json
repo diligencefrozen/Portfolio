@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "fetchedAt": "2026-08-28T10:02:26.519Z",
+  "fetchedAt": "2026-08-28T21:47:01.792Z",
   "projects": {
     "dcinside-gallery-blocker": {
       "chromeWebStore": {
@@ -8,7 +8,7 @@
         "sourceUrl": "https://chromewebstore.google.com/detail/fnfmdbldnhadkadklplhcjcojjiaopgg/reviews?hl=ko",
         "category": "확장 프로그램",
         "subcategory": "도구",
-        "userCount": 836,
+        "userCount": 844,
         "rating": 4.5,
         "ratingCount": 20,
         "reviews": [
