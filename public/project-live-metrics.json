@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "fetchedAt": "2026-09-12T15:09:05.850Z",
+  "fetchedAt": "2026-09-12T20:16:39.223Z",
   "projects": {
     "dcinside-gallery-blocker": {
       "chromeWebStore": {
@@ -8,7 +8,7 @@
         "sourceUrl": "https://chromewebstore.google.com/detail/fnfmdbldnhadkadklplhcjcojjiaopgg/reviews?hl=ko",
         "category": "확장 프로그램",
         "subcategory": "도구",
-        "userCount": 989,
+        "userCount": 1000,
         "rating": 4.6,
         "ratingCount": 21,
         "reviews": [
@@ -122,10 +122,10 @@
         "status": "ok",
         "repo": "diligencefrozen/DCinside-Gallery-Blocker",
         "sourceUrl": "https://github.com/diligencefrozen/DCinside-Gallery-Blocker",
-        "commitCount": 619,
-        "latestCommitAt": "2026-08-22T07:01:11Z",
-        "latestCommitMessage": "fix: 키워드 보기의 비회원 차단 우회 방지",
-        "latestCommitUrl": "https://github.com/diligencefrozen/DCinside-Gallery-Blocker/commit/b715873b05498b7f3bdd03c601499ff0cf09bcc6"
+        "commitCount": 627,
+        "latestCommitAt": "2026-09-12T16:20:14Z",
+        "latestCommitMessage": "fix: collapse empty DCCon rows and harden text detection",
+        "latestCommitUrl": "https://github.com/diligencefrozen/DCinside-Gallery-Blocker/commit/e8c84e6839f6d35b09c56d44f9596348aadcbc8c"
       }
     }
   }
