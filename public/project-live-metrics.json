@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "fetchedAt": "2026-09-21T12:12:32.602Z",
+  "fetchedAt": "2026-09-21T21:45:55.195Z",
   "projects": {
     "dcinside-gallery-blocker": {
       "chromeWebStore": {
@@ -122,10 +122,10 @@
         "status": "ok",
         "repo": "diligencefrozen/DCinside-Gallery-Blocker",
         "sourceUrl": "https://github.com/diligencefrozen/DCinside-Gallery-Blocker",
-        "commitCount": 668,
-        "latestCommitAt": "2026-09-17T11:47:40Z",
-        "latestCommitMessage": "fix: finalize tracked detector artifacts and notices",
-        "latestCommitUrl": "https://github.com/diligencefrozen/DCinside-Gallery-Blocker/commit/ec99eaf20a3483f9f9351d0951be23522614b8e7"
+        "commitCount": 675,
+        "latestCommitAt": "2026-09-21T14:36:04Z",
+        "latestCommitMessage": "Merge branch 'develop'",
+        "latestCommitUrl": "https://github.com/diligencefrozen/DCinside-Gallery-Blocker/commit/a0252dddf3d305deea55c942f4be31e252e5c635"
       }
     }
   }
