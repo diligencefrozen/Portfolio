@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "fetchedAt": "2026-09-25T11:20:53.167Z",
+  "fetchedAt": "2026-09-25T16:44:47.690Z",
   "projects": {
     "dcinside-gallery-blocker": {
       "chromeWebStore": {
@@ -122,10 +122,10 @@
         "status": "ok",
         "repo": "diligencefrozen/DCinside-Gallery-Blocker",
         "sourceUrl": "https://github.com/diligencefrozen/DCinside-Gallery-Blocker",
-        "commitCount": 675,
-        "latestCommitAt": "2026-09-21T14:36:04Z",
-        "latestCommitMessage": "Merge branch 'develop'",
-        "latestCommitUrl": "https://github.com/diligencefrozen/DCinside-Gallery-Blocker/commit/a0252dddf3d305deea55c942f4be31e252e5c635"
+        "commitCount": 677,
+        "latestCommitAt": "2026-09-25T15:10:39Z",
+        "latestCommitMessage": "fix(ui): rename AI expression filter to aggressive expression detection",
+        "latestCommitUrl": "https://github.com/diligencefrozen/DCinside-Gallery-Blocker/commit/f39c547010e5145e96d4b26a3427c2839e3443fd"
       }
     }
   }
