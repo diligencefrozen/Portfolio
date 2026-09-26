@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "fetchedAt": "2026-09-26T15:56:45.879Z",
+  "fetchedAt": "2026-09-26T20:44:22.660Z",
   "projects": {
     "dcinside-gallery-blocker": {
       "chromeWebStore": {
@@ -122,10 +122,10 @@
         "status": "ok",
         "repo": "diligencefrozen/DCinside-Gallery-Blocker",
         "sourceUrl": "https://github.com/diligencefrozen/DCinside-Gallery-Blocker",
-        "commitCount": 677,
-        "latestCommitAt": "2026-09-25T15:10:39Z",
-        "latestCommitMessage": "fix(ui): rename AI expression filter to aggressive expression detection",
-        "latestCommitUrl": "https://github.com/diligencefrozen/DCinside-Gallery-Blocker/commit/f39c547010e5145e96d4b26a3427c2839e3443fd"
+        "commitCount": 684,
+        "latestCommitAt": "2026-09-26T17:34:57Z",
+        "latestCommitMessage": "perf: Firefox 기능 로딩 속도 개선 및 배치 주입 최적화",
+        "latestCommitUrl": "https://github.com/diligencefrozen/DCinside-Gallery-Blocker/commit/f844adf0b4253860a0096f7ae2194fb16a6e9645"
       }
     }
   }
