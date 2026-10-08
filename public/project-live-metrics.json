@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "fetchedAt": "2026-10-08T12:57:24.523Z",
+  "fetchedAt": "2026-10-08T23:01:21.881Z",
   "projects": {
     "dcinside-gallery-blocker": {
       "chromeWebStore": {
@@ -122,10 +122,10 @@
         "status": "ok",
         "repo": "diligencefrozen/DCinside-Gallery-Blocker",
         "sourceUrl": "https://github.com/diligencefrozen/DCinside-Gallery-Blocker",
-        "commitCount": 685,
-        "latestCommitAt": "2026-09-27T05:03:45Z",
-        "latestCommitMessage": "fix: 댓글 작성자 UI 한 줄 정렬 개선",
-        "latestCommitUrl": "https://github.com/diligencefrozen/DCinside-Gallery-Blocker/commit/ca196208034b6fec059bb7e0ea9c539bf6b1904c"
+        "commitCount": 698,
+        "latestCommitAt": "2026-10-08T15:41:30Z",
+        "latestCommitMessage": "수정",
+        "latestCommitUrl": "https://github.com/diligencefrozen/DCinside-Gallery-Blocker/commit/da4f8c358977102cc36cfe4231f87a7c7deb6299"
       }
     }
   }
