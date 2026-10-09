@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "fetchedAt": "2026-10-09T05:00:19.171Z",
+  "fetchedAt": "2026-10-09T12:43:39.365Z",
   "projects": {
     "dcinside-gallery-blocker": {
       "chromeWebStore": {
@@ -122,10 +122,10 @@
         "status": "ok",
         "repo": "diligencefrozen/DCinside-Gallery-Blocker",
         "sourceUrl": "https://github.com/diligencefrozen/DCinside-Gallery-Blocker",
-        "commitCount": 698,
-        "latestCommitAt": "2026-10-08T15:41:30Z",
-        "latestCommitMessage": "수정",
-        "latestCommitUrl": "https://github.com/diligencefrozen/DCinside-Gallery-Blocker/commit/da4f8c358977102cc36cfe4231f87a7c7deb6299"
+        "commitCount": 702,
+        "latestCommitAt": "2026-10-09T11:26:26Z",
+        "latestCommitMessage": "설명(svg)",
+        "latestCommitUrl": "https://github.com/diligencefrozen/DCinside-Gallery-Blocker/commit/fbc342291009335c19c6e9ec1b7cc41eeb6f1b36"
       }
     }
   }
