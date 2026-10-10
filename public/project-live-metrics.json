@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "fetchedAt": "2026-10-10T12:02:22.538Z",
+  "fetchedAt": "2026-10-10T21:16:03.273Z",
   "projects": {
     "dcinside-gallery-blocker": {
       "chromeWebStore": {
@@ -10,7 +10,7 @@
         "subcategory": "도구",
         "userCount": 1000,
         "rating": 4.6,
-        "ratingCount": 28,
+        "ratingCount": 29,
         "reviews": [
           {
             "author": "yuuri",
