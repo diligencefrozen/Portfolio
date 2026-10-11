@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "fetchedAt": "2026-10-11T12:15:28.352Z",
+  "fetchedAt": "2026-10-11T21:35:51.220Z",
   "projects": {
     "dcinside-gallery-blocker": {
       "chromeWebStore": {
@@ -122,10 +122,10 @@
         "status": "ok",
         "repo": "diligencefrozen/DCinside-Gallery-Blocker",
         "sourceUrl": "https://github.com/diligencefrozen/DCinside-Gallery-Blocker",
-        "commitCount": 702,
-        "latestCommitAt": "2026-10-09T11:26:26Z",
-        "latestCommitMessage": "설명(svg)",
-        "latestCommitUrl": "https://github.com/diligencefrozen/DCinside-Gallery-Blocker/commit/fbc342291009335c19c6e9ec1b7cc41eeb6f1b36"
+        "commitCount": 703,
+        "latestCommitAt": "2026-10-11T12:20:28Z",
+        "latestCommitMessage": "Optimize dynamic DOM cleanup performance",
+        "latestCommitUrl": "https://github.com/diligencefrozen/DCinside-Gallery-Blocker/commit/a8c56d6fa2ed407f4d45430578694f613973622d"
       }
     }
   }
