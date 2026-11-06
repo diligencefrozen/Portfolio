@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "fetchedAt": "2026-11-06T05:30:20.388Z",
+  "fetchedAt": "2026-11-06T13:51:51.184Z",
   "projects": {
     "dcinside-gallery-blocker": {
       "chromeWebStore": {
@@ -122,10 +122,10 @@
         "status": "ok",
         "repo": "diligencefrozen/DCinside-Gallery-Blocker",
         "sourceUrl": "https://github.com/diligencefrozen/DCinside-Gallery-Blocker",
-        "commitCount": 726,
-        "latestCommitAt": "2026-11-05T12:49:35Z",
-        "latestCommitMessage": "Fix textcon attachment and recover incomplete preview icon lists",
-        "latestCommitUrl": "https://github.com/diligencefrozen/DCinside-Gallery-Blocker/commit/19afdb0090a6e9396c5f5da71214ae891b438773"
+        "commitCount": 727,
+        "latestCommitAt": "2026-11-06T08:08:42Z",
+        "latestCommitMessage": "Fix preview textcon submission and duplicate rendering",
+        "latestCommitUrl": "https://github.com/diligencefrozen/DCinside-Gallery-Blocker/commit/963c0ccce55b6d542139e20c3383cae5770bf156"
       }
     }
   }
