@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "fetchedAt": "2026-11-15T22:33:02.796Z",
+  "fetchedAt": "2026-11-16T05:13:36.850Z",
   "projects": {
     "dcinside-gallery-blocker": {
       "chromeWebStore": {
@@ -122,10 +122,10 @@
         "status": "ok",
         "repo": "diligencefrozen/DCinside-Gallery-Blocker",
         "sourceUrl": "https://github.com/diligencefrozen/DCinside-Gallery-Blocker",
-        "commitCount": 728,
-        "latestCommitAt": "2026-11-06T12:47:58Z",
-        "latestCommitMessage": "Fix layout loops after restoring enabled author controls",
-        "latestCommitUrl": "https://github.com/diligencefrozen/DCinside-Gallery-Blocker/commit/b8bea4e3f097cb12d944c9533c58087b811c7d46"
+        "commitCount": 755,
+        "latestCommitAt": "2026-11-16T01:40:14Z",
+        "latestCommitMessage": "Prevent keyword content from flashing before preview filters resolve",
+        "latestCommitUrl": "https://github.com/diligencefrozen/DCinside-Gallery-Blocker/commit/256a3de9f779a73076468f71a8450b388f322c11"
       }
     }
   }
