@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "fetchedAt": "2026-11-25T07:23:48.363Z",
+  "fetchedAt": "2026-11-25T21:12:06.474Z",
   "projects": {
     "dcinside-gallery-blocker": {
       "chromeWebStore": {
@@ -122,10 +122,10 @@
         "status": "ok",
         "repo": "diligencefrozen/DCinside-Gallery-Blocker",
         "sourceUrl": "https://github.com/diligencefrozen/DCinside-Gallery-Blocker",
-        "commitCount": 755,
-        "latestCommitAt": "2026-11-16T01:40:14Z",
-        "latestCommitMessage": "Prevent keyword content from flashing before preview filters resolve",
-        "latestCommitUrl": "https://github.com/diligencefrozen/DCinside-Gallery-Blocker/commit/256a3de9f779a73076468f71a8450b388f322c11"
+        "commitCount": 764,
+        "latestCommitAt": "2026-11-25T12:24:32Z",
+        "latestCommitMessage": "Reduce repeated work in list filtering, block statistics, and read history",
+        "latestCommitUrl": "https://github.com/diligencefrozen/DCinside-Gallery-Blocker/commit/33ad3c4109a35b68e19c701c334d020a1e48cefa"
       }
     }
   }
